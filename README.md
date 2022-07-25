@@ -24,6 +24,10 @@ No tests have been done yet
 
 Assigned July 21, 2022
 
+## Program
+
+graphic_display.py is to act as a virtual power supply.
+
 ## todo
 
 set example of how to change voltage
@@ -39,3 +43,7 @@ or multiplicative noise: current * noise
 wxPython for graphics
 
 lex and yacc are interesting
+
+What happens if voltage and power exceed power? Should we prevent this from happening in the first place?
+
+When adding noise, do you change voltage? current? both?

@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
+from random import random
 
 from power_supply import (Commands, DebugProtocol, EthernetProtocol,
                           PowerSupply, UsbProtocol)
@@ -14,8 +15,6 @@ class Application:
     volt_label: ttk.Label
     curr_label: ttk.Label
     power_label: ttk.Label
-    on_label: ttk.Label
-    protocol_label:
     on_button: ttk.Button
     protocol_button: ttk.Button
     power_supply: PowerSupply
@@ -46,9 +45,9 @@ class Application:
     def load_all_graphics(self) -> None:
         self.load_app_window()
         self.load_sliders()
+        self.load_labels()
         self.load_on_switch()
         self.load_protocol_switch()
-        self.load_labels()
         self.load_popup_menu()
 
     def load_popup_menu(self) -> None:
@@ -92,44 +91,32 @@ class Application:
         self.curr_slider.resolution = 1
 
     def load_protocol_switch(self) -> None:
-        self.protocol_button = Button(text="Change to Ethernet", width=10, command=self.toggle_protocol_switch)
+        self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 3, column = 1, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
-        if self.protocol_button.config('text')[-1] == 'Change to USB':
-            self.protocol_label.configure(
-                text="Currently using USB"
-            )
+        if self.protocol_button.config('text')[-1] == 'USB':
+            self.protocol_button.config(text='ETHERNET')
             self.power_supply = PowerSupply(protocol=DebugProtocol())
-            self.protocol_button.config(text='Change to Ethernet')
         else:
-            self.protocol_label.configure(
-                text="Currently using Ethernet"
-            )
+            self.protocol_button.config(text='USB')
             self.power_supply = PowerSupply(protocol=DebugProtocol())
-            self.protocol_button.config(text='Change to USB')
 
     def load_on_switch(self) -> None:
-        self.on_button = Button(text="Turn Off", width=10, command=self.toggle_on_switch)
+        self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
         self.on_button.grid(row = 0, column = 1, padx = 10, pady = 10)
         # self.on_button.pack(pady=10)
 
     def toggle_on_switch(self) -> None:
         # TODO - verify if this works
-        if self.on_button.config('text')[-1] == 'Turn On':
-            self.on_label.configure(
-                text="Currently On"
-            )
-            self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
-            self.on_button.config(text='Turn Off')
-        else:
-            self.on_label.configure(
-                text="Currently Off"
-            )
+        if self.on_button.config('text')[-1] == 'ON':
+            self.on_button.config(text='OFF')
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
-            self.on_button.config(text='Turn On')
+        else:
+            self.on_button.config(text='ON')
+            self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
 
     def load_app_window(self) -> None:
         self.app_window = tk.Tk()
@@ -155,18 +142,6 @@ class Application:
         )
         self.power_label.grid(row = 3, column = 2, padx = 10, pady = 10)
 
-        self.on_label = ttk.Label(
-            self.app_window,
-            text="Currently Off"
-        )
-        self.on_label.grid(row = 1, column = 1, padx = 10, pady = 10)
-
-        self.power_label = ttk.Label(
-            self.app_window,
-            text="Currently using USB"
-        )
-        self.power_label.grid(row = 4, column = 1, padx = 10, pady = 10)
-
     def load_sliders(self) -> None:
         self.volt_slider = ttk.Scale(
             self.app_window,
@@ -189,6 +164,8 @@ class Application:
         self.curr_slider.grid(row = 4, column = 0, padx = 10, pady = 10)
 
     def change_volt(self, volt: float) -> None:
+        if (volt < 0 or volt > 80):
+            return
         self.volt_label.configure(text=f"Voltage: {round(volt, 3)}V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
 
@@ -197,6 +174,8 @@ class Application:
         self.update_power()
 
     def change_curr(self, curr: float) -> None:
+        if (curr < 0 or curr > 120):
+            return
         self.curr_label.configure(text=f"Current: {round(curr, 3)}A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
 
@@ -209,6 +188,17 @@ class Application:
             text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)}W"
         )
 
+    def create_additive_noise(self, add_factor: float) -> None:
+        while True:
+            self.change_volt(self.volt_slider.get() + (random() - 0.5)*add_factor)
+
+    def create_mult_noise(self, mult_factor: float) -> None:
+        # expect mult_factor to be a number between 0 and 1, most definitely closer to 0 though)
+        while True:
+            self.change_volt(
+                self.volt_slider.get() 
+                * (1 + (random() - 0.5)*mult_factor)
+            )
 
 def main():
     app = Application()
