@@ -115,28 +115,28 @@ class Application:
         self.popup_menu.tk_popup(event.x_root, event.y_root)
 
     def volt_res_thousandth(self) -> None:
-        self.volt_slider.resolution = 0.001
+        self.volt_slider.configure(resolution = 0.001)
 
     def volt_res_hundredth(self) -> None:
-        self.volt_slider.resolution = 0.01
+        self.volt_slider.configure(resolution = 0.01)
 
     def volt_res_tenths(self) -> None:
-        self.volt_slider.resolution = 0.1
+        self.volt_slider.configure(resolution = 0.1)
 
     def volt_res_int(self) -> None:
-        self.volt_slider.resolution = 1
+        self.volt_slider.configure(resolution = 1)
 
     def curr_res_thousandth(self) -> None:
-        self.curr_slider.resolution = 0.001
+        self.curr_slider.configure(resolution = 0.001)
 
     def curr_res_hundredth(self) -> None:
-        self.curr_slider.resolution = 0.01
+        self.curr_slider.configure(resolution = 0.01)
 
     def curr_res_tenths(self) -> None:
-        self.curr_slider.resolution = 0.1
+        self.curr_slider.configure(resolution = 0.1)
 
     def curr_res_int(self) -> None:
-        self.curr_slider.resolution = 1
+        self.curr_slider.configure(resolution = 1)
 
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
