@@ -10,17 +10,26 @@ from power_supply import (Commands, DebugProtocol, EthernetProtocol,
 class Application:
 
     app_window: tk.Tk
-    volt_slider: ttk.Scale
-    curr_slider: ttk.Scale
+    volt_frame: ttk.Frame
+    curr_frame: ttk.Frame
+    power_frame: ttk.Frame
+    volt_slider: tk.Scale
+    curr_slider: tk.Scale
     volt_label: ttk.Label
     curr_label: ttk.Label
     power_label: ttk.Label
     on_button: ttk.Button
     protocol_button: ttk.Button
+    popup_menu: tk.Menu
+    noise_menu: tk.OptionMenu
+    noise_status: tk.StringVar
     power_supply: PowerSupply
 
     def __init__(self) -> None:
         self.app_window = None
+        self.volt_frame = None
+        self.curr_frame = None
+        self.power_frame = None
         self.volt_slider = None
         self.curr_slider = None
         self.volt_label = None
@@ -56,6 +65,7 @@ class Application:
 
     def load_all_graphics(self) -> None:
         self.load_app_window()
+        self.load_frames()
         self.load_sliders()
         self.load_labels()
         self.load_on_switch()
@@ -64,27 +74,45 @@ class Application:
         self.load_noise_menu()
 
     def load_noise_menu(self) -> None:
-        choices = ["No Noise", "Additive Noise", "Random Noise"]
+        choices = ["No Noise", "Additive Noise", "Multiplicative Noise"]
         self.noise_status = tk.StringVar()
         self.noise_status.set(choices[0])
-        self.noise_menu = tk.OptionMenu(self, self.noise_status, *choices)
-        self.noise_menu.grid(row = 0, column = 4, padx = 10, pady = 10)
+        self.noise_menu = tk.OptionMenu(self.app_window, self.noise_status, *choices)
+        self.noise_menu.grid(row = 0, column = 2, padx = 10, pady = 10)
 
     def load_popup_menu(self) -> None:
-        self.popup_menu = Menu(self.app_window, tearoff=False)
-        self.popup_menu.add_command(label="Change voltage resolution to 0.001", command=self.volt_res_thousandth)
-        self.popup_menu.add_command(label="Change voltage resolution to 0.01", command=self.volt_res_hundredth)
-        self.popup_menu.add_command(label="Change voltage resolution to 0.1", command=self.volt_res_tenths)
-        self.popup_menu.add_command(label="Change voltage resolution to 1", command=self.volt_res_int)
+        self.popup_menu = tk.Menu(self.app_window, tearoff=False)
+        self.popup_menu.add_command(
+            label="Change voltage resolution to 0.001",
+            command=self.volt_res_thousandth)
+        self.popup_menu.add_command(
+            label="Change voltage resolution to 0.01",
+            command=self.volt_res_hundredth)
+        self.popup_menu.add_command(
+            label="Change voltage resolution to 0.1",
+            command=self.volt_res_tenths)
+        self.popup_menu.add_command(
+            label="Change voltage resolution to 1",
+            command=self.volt_res_int)
         self.popup_menu.add_separator()
-        self.popup_menu.add_command(label="Change current resolution to 0.001", command=self.curr_res_thousandth)
-        self.popup_menu.add_command(label="Change current resolution to 0.01", command=self.curr_res_hundredth)
-        self.popup_menu.add_command(label="Change current resolution to 0.1", command=self.curr_res_tenths)
-        self.popup_menu.add_command(label="Change current resolution to 1", command=self.curr_res_int)
-        self.app_window.bind("<Button-3>", self.popup_menu)
+        self.popup_menu.add_command(
+            label="Change current resolution to 0.001",
+            command=self.curr_res_thousandth)
+        self.popup_menu.add_command(
+            label="Change current resolution to 0.01",
+            command=self.curr_res_hundredth)
+        self.popup_menu.add_command(
+            label="Change current resolution to 0.1",
+            command=self.curr_res_tenths)
+        self.popup_menu.add_command(
+            label="Change current resolution to 1",
+            command=self.curr_res_int)
+        
+        # Right-click
+        self.app_window.bind("<Button-3>", self.show_popup_menu)
 
-    def popup_menu(self, event) -> None:
-        self.app_window.tk_popup(event.x_root, event.y_root)
+    def show_popup_menu(self, event) -> None:
+        self.popup_menu.tk_popup(event.x_root, event.y_root)
 
     def volt_res_thousandth(self) -> None:
         self.volt_slider.resolution = 0.001
@@ -112,7 +140,7 @@ class Application:
 
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
-        self.protocol_button.grid(row = 3, column = 1, padx = 10, pady = 10)
+        self.protocol_button.grid(row = 1, column = 1, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
@@ -141,30 +169,50 @@ class Application:
     def load_app_window(self) -> None:
         self.app_window = tk.Tk()
         self.app_window.title("Virtual Power Supply")
+
         self.center_window(self.app_window)
+
+    def load_frames(self) -> None:
+        self.volt_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Voltage"
+        )
+        self.volt_frame.grid(row = 0, column = 0, padx = 10, pady = 10)
+
+        self.curr_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Current"
+        )
+        self.curr_frame.grid(row = 1, column = 0, padx = 10, pady = 10)
+
+        self.power_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Power"
+        )
+        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
 
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
-            self.app_window,
+            self.volt_frame,
             text=self.volt_slider.get()
         )
         self.volt_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
         self.curr_label = ttk.Label(
-            self.app_window,
+            self.curr_frame,
             text=self.curr_slider.get()
         )
-        self.curr_label.grid(row = 3, column = 0, padx = 10, pady = 10)
+        self.curr_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
         self.power_label = ttk.Label(
-            self.app_window,
+            self.power_frame,
             text=self.volt_slider.get() * self.curr_slider.get()
         )
-        self.power_label.grid(row = 3, column = 2, padx = 10, pady = 10)
+        self.power_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
     def load_sliders(self) -> None:
-        self.volt_slider = ttk.Scale(
-            self.app_window,
+        self.volt_slider = tk.Scale(
+            self.volt_frame,
             from_=0,
             to=80,
             orient='horizontal',
@@ -173,20 +221,20 @@ class Application:
         )
         self.volt_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
 
-        self.curr_slider = ttk.Scale(
-            self.app_window,
+        self.curr_slider = tk.Scale(
+            self.curr_frame,
             from_=0,
             to=120,
             orient='horizontal',
             resolution=0.001,
             command=self.curr_slider_changed
         )
-        self.curr_slider.grid(row = 4, column = 0, padx = 10, pady = 10)
+        self.curr_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
 
     def change_volt(self, volt: float) -> None:
         if (volt < 0 or volt > 80):
             return
-        self.volt_label.configure(text=f"Voltage: {round(volt, 3)}V")
+        self.volt_label.configure(text=f"Voltage: {round(volt, 3)} V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
         self.update_power()
 
@@ -196,7 +244,7 @@ class Application:
     def change_curr(self, curr: float) -> None:
         if (curr < 0 or curr > 120):
             return
-        self.curr_label.configure(text=f"Current: {round(curr, 3)}A")
+        self.curr_label.configure(text=f"Current: {round(curr, 3)} A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
         self.update_power()
 
@@ -214,7 +262,7 @@ class Application:
     def create_mult_noise(self, mult_factor: float) -> None:
         # expect mult_factor to be a number between 0 and 1, most definitely closer to 0 though)
         self.change_volt(
-            self.volt_slider.get() 
+            self.volt_slider.get()
             * (1 + (random() - 0.5)*mult_factor)
         )
 
