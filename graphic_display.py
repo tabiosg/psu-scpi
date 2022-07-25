@@ -35,6 +35,7 @@ class Application:
         self.load_all_graphics()
 
     def run(self) -> None:
+        self.app_window.after(100, self.update_noise)
         self.app_window.mainloop()
 
     def center_window(self, window_name: tk.Tk) -> None:
@@ -43,6 +44,15 @@ class Application:
         horiz_center = int(window_name.winfo_screenwidth()/2 - win_width/2)
         vert_center = int(window_name.winfo_screenheight()/2 - win_height/2)
         window_name.geometry("+{}+{}".format(horiz_center, vert_center))
+
+    def update_noise(self) -> None:
+        if self.noise_status.get() == "No Noise":
+            pass
+        elif self.noise_status.get() == "Additive Noise":
+            self.create_additive_noise(1)
+        elif self.noise_status.get() == "Multiplicative Noise":
+            self.create_mult_noise(1)
+        self.app_window.after(100, self.update_noise)
 
     def load_all_graphics(self) -> None:
         self.load_app_window()
@@ -54,10 +64,10 @@ class Application:
         self.load_noise_menu()
 
     def load_noise_menu(self) -> None:
-        choices = ["No noise", "Additive Noise", "Random Noise"]
-        self.choice_var = tk.StringVar()
-        self.choice_var.set(choices[0])
-        self.noise_menu = tk.OptionMenu(self, self.choice_var, *choices)
+        choices = ["No Noise", "Additive Noise", "Random Noise"]
+        self.noise_status = tk.StringVar()
+        self.noise_status.set(choices[0])
+        self.noise_menu = tk.OptionMenu(self, self.noise_status, *choices)
         self.noise_menu.grid(row = 0, column = 4, padx = 10, pady = 10)
 
     def load_popup_menu(self) -> None:
@@ -178,20 +188,20 @@ class Application:
             return
         self.volt_label.configure(text=f"Voltage: {round(volt, 3)}V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
+        self.update_power()
 
     def volt_slider_changed(self, event) -> None:
         self.change_volt(self.volt_slider.get())
-        self.update_power()
 
     def change_curr(self, curr: float) -> None:
         if (curr < 0 or curr > 120):
             return
         self.curr_label.configure(text=f"Current: {round(curr, 3)}A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
+        self.update_power()
 
     def curr_slider_changed(self, event) -> None:
         self.change_curr(self.curr_slider.get())
-        self.update_power()
 
     def update_power(self) -> None:
         self.power_label.configure(
@@ -199,16 +209,14 @@ class Application:
         )
 
     def create_additive_noise(self, add_factor: float) -> None:
-        while True:
-            self.change_volt(self.volt_slider.get() + (random() - 0.5)*add_factor)
+        self.change_volt(self.volt_slider.get() + (random() - 0.5)*add_factor)
 
     def create_mult_noise(self, mult_factor: float) -> None:
         # expect mult_factor to be a number between 0 and 1, most definitely closer to 0 though)
-        while True:
-            self.change_volt(
-                self.volt_slider.get() 
-                * (1 + (random() - 0.5)*mult_factor)
-            )
+        self.change_volt(
+            self.volt_slider.get() 
+            * (1 + (random() - 0.5)*mult_factor)
+        )
 
 def main():
     app = Application()
