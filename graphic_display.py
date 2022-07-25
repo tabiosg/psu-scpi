@@ -8,8 +8,17 @@ from power_supply import (Commands, DebugProtocol, EthernetProtocol,
 
 class Application:
 
+    app_window: tk.Tk
+    volt_slider: ttk.Scale
+    curr_slider: ttk.Scale
+    volt_label: ttk.Label
+    curr_label: ttk.Label
+    power_label: ttk.Label
+    on_button: ttk.Button
+    protocol_button: ttk.Button
+    power_supply: PowerSupply
+
     def __init__(self) -> None:
-        self.load_all_graphics()
         self.app_window = None
         self.volt_slider = None
         self.curr_slider = None
@@ -19,6 +28,7 @@ class Application:
         self.on_button = None
         self.protocol_button = None
         self.power_supply = PowerSupply(protocol=DebugProtocol())
+        self.load_all_graphics()
 
     def run(self) -> None:
         self.app_window.mainloop()
@@ -39,20 +49,22 @@ class Application:
 
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
-        self.protocol_button.pack(pady=10)
+        self.protocol_button.grid(row = 3, column = 1, padx = 10, pady = 10)
+        # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
-        if self.on_button.config('text')[-1] == 'USB':
-            self.on_button.config(text='ETHERNET')
+        if self.protocol_button.config('text')[-1] == 'USB':
+            self.protocol_button.config(text='ETHERNET')
             self.power_supply = PowerSupply(protocol=DebugProtocol())
         else:
-            self.on_button.config(text='USB')
+            self.protocol_button.config(text='USB')
             self.power_supply = PowerSupply(protocol=DebugProtocol())
 
     def load_on_switch(self) -> None:
         self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
-        self.on_button.pack(pady=10)
+        self.on_button.grid(row = 0, column = 1, padx = 10, pady = 10)
+        # self.on_button.pack(pady=10)
 
     def toggle_on_switch(self) -> None:
         # TODO - verify if this works
@@ -73,14 +85,19 @@ class Application:
             self.app_window,
             text=self.volt_slider.get()
         )
+        self.volt_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+
         self.curr_label = ttk.Label(
             self.app_window,
             text=self.curr_slider.get()
         )
+        self.curr_label.grid(row = 3, column = 0, padx = 10, pady = 10)
+
         self.power_label = ttk.Label(
             self.app_window,
             text=self.volt_slider.get() * self.curr_slider.get()
         )
+        self.power_label.grid(row = 3, column = 2, padx = 10, pady = 10)
 
     def load_sliders(self) -> None:
         self.volt_slider = ttk.Scale(
@@ -90,6 +107,8 @@ class Application:
             orient='horizontal',
             command=self.volt_slider_changed
         )
+        self.volt_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+
         self.curr_slider = ttk.Scale(
             self.app_window,
             from_=0,
@@ -97,6 +116,7 @@ class Application:
             orient='horizontal',
             command=self.curr_slider_changed
         )
+        self.curr_slider.grid(row = 4, column = 0, padx = 10, pady = 10)
 
     def change_volt(self, volt: float) -> None:
         self.volt_label.configure(text=volt)
@@ -112,7 +132,7 @@ class Application:
         self.power_supply.make_command(Commands.SET_CURR, curr)
 
     def curr_slider_changed(self, event) -> None:
-        self.change_curr(self.volt_slider.get())
+        self.change_curr(self.curr_slider.get())
         self.update_power()
 
     def update_power(self) -> None:
