@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import *
 from random import random
+from tkinter import *
 
 from power_supply import (Commands, DebugProtocol, EthernetProtocol,
                           PowerSupply, UsbProtocol)
@@ -29,6 +29,8 @@ class Application:
         self.on_button = None
         self.protocol_button = None
         self.popup_menu = None
+        self.noise_menu = None
+        self.noise_status = None
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
 
@@ -49,6 +51,14 @@ class Application:
         self.load_on_switch()
         self.load_protocol_switch()
         self.load_popup_menu()
+        self.load_noise_menu()
+
+    def load_noise_menu(self) -> None:
+        choices = ["No noise", "Additive Noise", "Random Noise"]
+        self.choice_var = tk.StringVar()
+        self.choice_var.set(choices[0])
+        self.noise_menu = tk.OptionMenu(self, self.choice_var, *choices)
+        self.noise_menu.grid(row = 0, column = 4, padx = 10, pady = 10)
 
     def load_popup_menu(self) -> None:
         self.popup_menu = Menu(self.app_window, tearoff=False)
