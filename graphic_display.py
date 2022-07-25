@@ -14,6 +14,8 @@ class Application:
     volt_label: ttk.Label
     curr_label: ttk.Label
     power_label: ttk.Label
+    on_label: ttk.Label
+    protocol_label:
     on_button: ttk.Button
     protocol_button: ttk.Button
     power_supply: PowerSupply
@@ -44,9 +46,9 @@ class Application:
     def load_all_graphics(self) -> None:
         self.load_app_window()
         self.load_sliders()
-        self.load_labels()
         self.load_on_switch()
         self.load_protocol_switch()
+        self.load_labels()
         self.load_popup_menu()
 
     def load_popup_menu(self) -> None:
@@ -90,32 +92,44 @@ class Application:
         self.curr_slider.resolution = 1
 
     def load_protocol_switch(self) -> None:
-        self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
+        self.protocol_button = Button(text="Change to Ethernet", width=10, command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 3, column = 1, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
-        if self.protocol_button.config('text')[-1] == 'USB':
-            self.protocol_button.config(text='ETHERNET')
+        if self.protocol_button.config('text')[-1] == 'Change to USB':
+            self.protocol_label.configure(
+                text="Currently using USB"
+            )
             self.power_supply = PowerSupply(protocol=DebugProtocol())
+            self.protocol_button.config(text='Change to Ethernet')
         else:
-            self.protocol_button.config(text='USB')
+            self.protocol_label.configure(
+                text="Currently using Ethernet"
+            )
             self.power_supply = PowerSupply(protocol=DebugProtocol())
+            self.protocol_button.config(text='Change to USB')
 
     def load_on_switch(self) -> None:
-        self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
+        self.on_button = Button(text="Turn Off", width=10, command=self.toggle_on_switch)
         self.on_button.grid(row = 0, column = 1, padx = 10, pady = 10)
         # self.on_button.pack(pady=10)
 
     def toggle_on_switch(self) -> None:
         # TODO - verify if this works
-        if self.on_button.config('text')[-1] == 'ON':
-            self.on_button.config(text='OFF')
-            self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
-        else:
-            self.on_button.config(text='ON')
+        if self.on_button.config('text')[-1] == 'Turn On':
+            self.on_label.configure(
+                text="Currently On"
+            )
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
+            self.on_button.config(text='Turn Off')
+        else:
+            self.on_label.configure(
+                text="Currently Off"
+            )
+            self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
+            self.on_button.config(text='Turn On')
 
     def load_app_window(self) -> None:
         self.app_window = tk.Tk()
@@ -140,6 +154,18 @@ class Application:
             text=self.volt_slider.get() * self.curr_slider.get()
         )
         self.power_label.grid(row = 3, column = 2, padx = 10, pady = 10)
+
+        self.on_label = ttk.Label(
+            self.app_window,
+            text="Currently Off"
+        )
+        self.on_label.grid(row = 1, column = 1, padx = 10, pady = 10)
+
+        self.power_label = ttk.Label(
+            self.app_window,
+            text="Currently using USB"
+        )
+        self.power_label.grid(row = 4, column = 1, padx = 10, pady = 10)
 
     def load_sliders(self) -> None:
         self.volt_slider = ttk.Scale(
