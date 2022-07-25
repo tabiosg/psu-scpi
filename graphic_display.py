@@ -27,6 +27,7 @@ class Application:
         self.power_label = None
         self.on_button = None
         self.protocol_button = None
+        self.popup_menu = None
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
 
@@ -46,6 +47,47 @@ class Application:
         self.load_labels()
         self.load_on_switch()
         self.load_protocol_switch()
+        self.load_popup_menu()
+
+    def load_popup_menu(self) -> None:
+        self.popup_menu = Menu(self.app_window, tearoff=False)
+        self.popup_menu.add_command(label="Change voltage resolution to 0.001", command=self.volt_res_thousandth)
+        self.popup_menu.add_command(label="Change voltage resolution to 0.01", command=self.volt_res_hundredth)
+        self.popup_menu.add_command(label="Change voltage resolution to 0.1", command=self.volt_res_tenths)
+        self.popup_menu.add_command(label="Change voltage resolution to 1", command=self.volt_res_int)
+        self.popup_menu.add_separator()
+        self.popup_menu.add_command(label="Change current resolution to 0.001", command=self.curr_res_thousandth)
+        self.popup_menu.add_command(label="Change current resolution to 0.01", command=self.curr_res_hundredth)
+        self.popup_menu.add_command(label="Change current resolution to 0.1", command=self.curr_res_tenths)
+        self.popup_menu.add_command(label="Change current resolution to 1", command=self.curr_res_int)
+        self.app_window.bind("<Button-3>", self.popup_menu)
+
+    def popup_menu(self, event) -> None:
+        self.app_window.tk_popup(event.x_root, event.y_root)
+
+    def volt_res_thousandth(self) -> None:
+        self.volt_slider.resolution = 0.001
+
+    def volt_res_hundredth(self) -> None:
+        self.volt_slider.resolution = 0.01
+
+    def volt_res_tenths(self) -> None:
+        self.volt_slider.resolution = 0.1
+
+    def volt_res_int(self) -> None:
+        self.volt_slider.resolution = 1
+
+    def curr_res_thousandth(self) -> None:
+        self.curr_slider.resolution = 0.001
+
+    def curr_res_hundredth(self) -> None:
+        self.curr_slider.resolution = 0.01
+
+    def curr_res_tenths(self) -> None:
+        self.curr_slider.resolution = 0.1
+
+    def curr_res_int(self) -> None:
+        self.curr_slider.resolution = 1
 
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
@@ -103,8 +145,9 @@ class Application:
         self.volt_slider = ttk.Scale(
             self.app_window,
             from_=0,
-            to=100,
+            to=80,
             orient='horizontal',
+            resolution=0.001,
             command=self.volt_slider_changed
         )
         self.volt_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
@@ -112,23 +155,23 @@ class Application:
         self.curr_slider = ttk.Scale(
             self.app_window,
             from_=0,
-            to=100,
+            to=120,
             orient='horizontal',
+            resolution=0.001,
             command=self.curr_slider_changed
         )
         self.curr_slider.grid(row = 4, column = 0, padx = 10, pady = 10)
 
     def change_volt(self, volt: float) -> None:
-        self.volt_label.configure(text=volt)
+        self.volt_label.configure(text=f"Voltage: {round(volt, 3)}V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
 
     def volt_slider_changed(self, event) -> None:
-        
         self.change_volt(self.volt_slider.get())
         self.update_power()
 
     def change_curr(self, curr: float) -> None:
-        self.curr_label.configure(text=curr)
+        self.curr_label.configure(text=f"Current: {round(curr, 3)}A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
 
     def curr_slider_changed(self, event) -> None:
@@ -137,7 +180,7 @@ class Application:
 
     def update_power(self) -> None:
         self.power_label.configure(
-            text=self.volt_slider.get() * self.curr_slider.get()
+            text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)}W"
         )
 
 
