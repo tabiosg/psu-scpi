@@ -117,7 +117,7 @@ class DebugProtocol(Protocol):
 
 class PowerSupply:
     
-    def __init__(self, protocol: Protocol = UsbProtocol):
+    def __init__(self, protocol: Protocol = UsbProtocol) -> None:
         self.protocol = protocol
 
     def make_command(self, scpi_command: ScpiCommand, arg_0: str = "", arg_1: str = "") -> str:
@@ -133,7 +133,8 @@ def example_usage_one():
     power_supply = PowerSupply(protocol=DebugProtocol())
     power_supply.make_command(Commands.RESET)
     print(power_supply.make_command(Commands.GET_OUT_CHANNEL))
-    power_supply.make_command(Commands.SET_OUT_CHANNEL, "CH2")
+    # TODO - Verify available channels on our Power Supply
+    power_supply.make_command(Commands.SET_OUT_CHANNEL, "CH1")
     print(power_supply.make_command(Commands.GET_VOLTS))
     power_supply.make_command(Commands.SET_VOLTS, 10.0)
     print(power_supply.make_command(Commands.GET_VOLTS))
@@ -146,9 +147,16 @@ def example_usage_two():
     print("EXAMPLE USE TWO \n")
     power_supply = PowerSupply(protocol=DebugProtocol())
     power_supply.make_command(Commands.RESET)
+    power_supply.make_command(Commands.SET_OUT_CHANNEL, "CH1")
     power_supply.make_command(Commands.GET_ID_STRING)
     power_supply.make_command(Commands.EXEC_SELF_TEST_AND_GET_RESULT)
     power_supply.make_command(Commands.GET_MORE_SELF_TEST_INFO)
+
+def example_turn_off():
+    """Turns off the power supply output"""
+    power_supply = PowerSupply(protocol=DebugProtocol())
+    power_supply.make_command(Commands.SET_OUT_CHANNEL, "CH1")
+    power_supply.make_command(Commands.SET_OCP_STATE, "OFF")
     
 
 def main():
