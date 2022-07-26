@@ -15,8 +15,9 @@ class Application:
     add_noise_frame: ttk.Frame
     mult_noise_frame: ttk.Frame
     power_frame: ttk.Frame
-    on_frame: ttk.LabelFrame
-    protocol_frame: ttk.LabelFrame
+    on_frame: ttk.Frame
+    protocol_frame: ttk.Frame
+    noise_select_frame: ttk.Frame
     volt_slider: tk.Scale
     curr_slider: tk.Scale
     add_noise_slider: tk.Scale
@@ -46,6 +47,7 @@ class Application:
         self.mult_noise_frame = None
         self.on_frame = None
         self.protocol_frame = None
+        self.noise_select_frame = None
         self.volt_slider = None
         self.curr_slider = None
         self.add_noise_slider = None
@@ -101,8 +103,8 @@ class Application:
         choices = ["No Noise", "Additive Noise", "Multiplicative Noise"]
         self.noise_status = tk.StringVar()
         self.noise_status.set(choices[0])
-        self.noise_menu = tk.OptionMenu(self.app_window, self.noise_status, *choices)
-        self.noise_menu.grid(row = 0, column = 2, padx = 10, pady = 10)
+        self.noise_menu = tk.OptionMenu(self.noise_select_frame, self.noise_status, *choices)
+        self.noise_menu.grid(row = 0, column = 0, padx = 10, pady = 10)
 
     def load_popup_menu(self) -> None:
         self.popup_menu = tk.Menu(self.app_window, tearoff=False)
@@ -277,6 +279,12 @@ class Application:
             text = "Power"
         )
         self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
+
+        self.noise_select_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Select Noise Type"
+        )
+        self.power_frame.grid(row = 0, column = 3, padx = 10, pady = 10)
 
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
