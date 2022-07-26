@@ -29,6 +29,8 @@ class Application:
     popup_menu: tk.Menu
     noise_menu: tk.OptionMenu
     noise_status: tk.StringVar
+    requested_voltage: float
+    requested_current: float
     power_supply: PowerSupply
 
     def __init__(self) -> None:
@@ -52,6 +54,8 @@ class Application:
         self.popup_menu = None
         self.noise_menu = None
         self.noise_status = None
+        self.requested_voltage = 0
+        self.requested_current = 0
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
 
@@ -95,30 +99,50 @@ class Application:
     def load_popup_menu(self) -> None:
         self.popup_menu = tk.Menu(self.app_window, tearoff=False)
         self.popup_menu.add_command(
-            label="Change voltage resolution to 0.001",
+            label="Change voltage slider resolution to 0.001",
             command=self.volt_res_thousandth)
         self.popup_menu.add_command(
-            label="Change voltage resolution to 0.01",
+            label="Change voltage slider resolution to 0.01",
             command=self.volt_res_hundredth)
         self.popup_menu.add_command(
-            label="Change voltage resolution to 0.1",
+            label="Change voltage slider resolution to 0.1",
             command=self.volt_res_tenths)
         self.popup_menu.add_command(
-            label="Change voltage resolution to 1",
+            label="Change voltage slider resolution to 1",
             command=self.volt_res_int)
         self.popup_menu.add_separator()
         self.popup_menu.add_command(
-            label="Change current resolution to 0.001",
+            label="Change current slider resolution to 0.001",
             command=self.curr_res_thousandth)
         self.popup_menu.add_command(
-            label="Change current resolution to 0.01",
+            label="Change current slider resolution to 0.01",
             command=self.curr_res_hundredth)
         self.popup_menu.add_command(
-            label="Change current resolution to 0.1",
+            label="Change current slider resolution to 0.1",
             command=self.curr_res_tenths)
         self.popup_menu.add_command(
-            label="Change current resolution to 1",
+            label="Change current slider resolution to 1",
             command=self.curr_res_int)
+        self.popup_menu.add_separator()
+        self.popup_menu.add_command(
+            label="Change add noise slider resolution to 0.001",
+            command=self.add_noise_res_thousandth)
+        self.popup_menu.add_command(
+            label="Change add noise slider resolution to 0.01",
+            command=self.add_noise_res_hundredth)
+        self.popup_menu.add_command(
+            label="Change add noise slider resolution to 0.1",
+            command=self.add_noise_res_tenths)
+        self.popup_menu.add_separator()
+        self.popup_menu.add_command(
+            label="Change mult noise slider resolution to 0.001",
+            command=self.mult_noise_res_thousandth)
+        self.popup_menu.add_command(
+            label="Change mult noise slider resolution to 0.01",
+            command=self.mult_noise_res_hundredth)
+        self.popup_menu.add_command(
+            label="Change mult noise slider resolution to 0.1",
+            command=self.mult_noise_res_tenths)
         
         # Right-click
         self.app_window.bind("<Button-3>", self.show_popup_menu)
@@ -150,6 +174,24 @@ class Application:
     def curr_res_int(self) -> None:
         self.curr_slider.configure(resolution = 1)
 
+    def add_noise_res_thousandth(self) -> None:
+        self.add_noise_slider.configure(resolution = 0.001)
+
+    def add_noise_res_hundredth(self) -> None:
+        self.add_noise_slider.configure(resolution = 0.01)
+
+    def add_noise_res_tenths(self) -> None:
+        self.add_noise_slider.configure(resolution = 0.1)
+
+    def mult_noise_res_thousandth(self) -> None:
+        self.mult_noise_slider.configure(resolution = 0.001)
+
+    def mult_noise_res_hundredth(self) -> None:
+        self.mult_noise_slider.configure(resolution = 0.01)
+
+    def mult_noise_res_tenths(self) -> None:
+        self.mult_noise_slider.configure(resolution = 0.1)
+
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 1, column = 1, padx = 10, pady = 10)
@@ -167,10 +209,8 @@ class Application:
     def load_on_switch(self) -> None:
         self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
         self.on_button.grid(row = 0, column = 1, padx = 10, pady = 10)
-        # self.on_button.pack(pady=10)
 
     def toggle_on_switch(self) -> None:
-        # TODO - verify if this works
         if self.on_button.config('text')[-1] == 'ON':
             self.on_button.config(text='OFF')
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
@@ -218,13 +258,13 @@ class Application:
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
             self.volt_frame,
-            text=self.volt_slider.get()
+            text=f"Voltage: {self.volt_slider.get()} V"
         )
         self.volt_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
         self.curr_label = ttk.Label(
             self.curr_frame,
-            text=self.curr_slider.get()
+            text=f"Curent: {self.curr_slider.get()} A"
         )
         self.curr_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
@@ -242,7 +282,7 @@ class Application:
 
         self.power_label = ttk.Label(
             self.power_frame,
-            text=self.volt_slider.get() * self.curr_slider.get()
+            text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)} W"
         )
         self.power_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
@@ -292,6 +332,7 @@ class Application:
             return
         self.volt_label.configure(text=f"Voltage: {round(volt, 3)} V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
+        self.requested_voltage = round(volt, 3)
         self.update_power()
 
     def volt_slider_changed(self, event) -> None:
@@ -302,6 +343,7 @@ class Application:
             return
         self.curr_label.configure(text=f"Current: {round(curr, 3)} A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
+        self.requested_current = round(curr, 3)
         self.update_power()
 
     def curr_slider_changed(self, event) -> None:
@@ -329,7 +371,7 @@ class Application:
 
     def update_power(self) -> None:
         self.power_label.configure(
-            text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)} W"
+            text=f"Power: {round(self.requested_voltage * self.requested_current, 3)} W"
         )
 
     def create_additive_noise(self, add_factor: float) -> None:

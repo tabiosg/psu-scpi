@@ -47,3 +47,5 @@ lex and yacc are interesting
 What happens if voltage and power exceed power? Should we prevent this from happening in the first place?
 
 When adding noise, do you change voltage? current? both?
+
+for code, make it alphabetical
