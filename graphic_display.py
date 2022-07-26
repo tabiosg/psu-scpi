@@ -102,16 +102,22 @@ class Application:
         window_name.geometry("+{}+{}".format(horiz_center, vert_center))
 
     def update_actual(self) -> None:
-        self.actual_voltage = self.power_supply.make_command(Commands.GET_VOLTS)
-        self.actual_voltage_label.configure(text=f"Voltage: {round(self.actual_voltage, 3)} V")
-        self.actual_current = self.power_supply.make_command(Commands.GET_CURR)
-        self.actual_current_label.configure(text=f"Current: {round(self.actual_current, 3)} A")
         try:
-            self.actual_power = self.actual_voltage * self.actual_current
+            self.actual_voltage = round(self.power_supply.make_command(Commands.GET_VOLTS), 3)
+        except ValueError:
+            self.actual_voltage = round(random() * -1, 3)  # done for debugging purposes
+        self.actual_voltage_label.configure(text=f"Voltage: {self.actual_voltage} V")
+        try:
+            self.actual_current = self.power_supply.make_command(Commands.GET_CURR)
+        except ValueError:
+            self.actual_current = round(random() * -1, 3)  # done for debugging purposes
+        self.actual_current_label.configure(text=f"Current: {self.actual_current} A")
+        try:
+            self.actual_power = round(self.actual_voltage * self.actual_current, 3)
         except ValueError:
             # self.actual_voltage and self.actual_current are not floats
             self.actual_power = 0
-        self.actual_power_label.configure(text=f"Power: {round(self.actual_power, 3)} W")
+        self.actual_power_label.configure(text=f"Power: {self.actual_power} W")
         self.actual_mode = self.power_supply.make_command(Commands.GET_OUT_MODE)
         self.actual_mode_label.configure(text=f"Mode: {self.actual_mode}")
         self.app_window.after(100, self.update_actual)
