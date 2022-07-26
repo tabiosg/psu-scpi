@@ -51,6 +51,7 @@ class Commands():
     SET_OCP_DELAY = SetCmd("CURR:PROT:DEL")
     GET_OUT_CHANNEL = GetCmd("INST?")
     SET_OUT_CHANNEL = SetCmd("INST CH")
+    GET_OUT_MODE = GetCmd("OUTP:MODE?")
     SET_CHANNEL_STATE = SetCmd("OUTP")
     RESET = SetCmd("*RST")
     GET_ID_STRING = GetCmd("*IDN?")

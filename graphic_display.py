@@ -18,6 +18,7 @@ class Application:
     on_frame: ttk.Frame
     protocol_frame: ttk.Frame
     noise_select_frame: ttk.Frame
+    actual_frame: ttk.Frame
     volt_slider: tk.Scale
     curr_slider: tk.Scale
     add_noise_slider: tk.Scale
@@ -29,6 +30,9 @@ class Application:
     power_label: ttk.Label
     on_label: ttk.Label
     protocol_label: ttk.Label
+    actual_voltage_label: ttk.Label
+    actual_current_label: ttk.Label
+    actual_power_label: ttk.Label
     on_button: ttk.Button
     protocol_button: ttk.Button
     popup_menu: tk.Menu
@@ -36,6 +40,10 @@ class Application:
     noise_status: tk.StringVar
     requested_voltage: float
     requested_current: float
+    actual_voltage: str
+    actual_current: str
+    actual_power: str
+    actual_mode: str
     power_supply: PowerSupply
 
     def __init__(self) -> None:
@@ -66,11 +74,16 @@ class Application:
         self.noise_status = None
         self.requested_voltage = 0
         self.requested_current = 0
+        self.actual_voltage = "0"
+        self.actual_current = "0"
+        self.actual_power = "0"
+        self.actual_mode = "Unknown"
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
 
     def run(self) -> None:
         self.app_window.after(100, self.update_noise)
+        self.app_window.after(100, self.update_actual)
         self.app_window.mainloop()
 
     def center_window(self, window_name: tk.Tk) -> None:
@@ -79,6 +92,21 @@ class Application:
         horiz_center = int(window_name.winfo_screenwidth()/2 - win_width/2)
         vert_center = int(window_name.winfo_screenheight()/2 - win_height/2)
         window_name.geometry("+{}+{}".format(horiz_center, vert_center))
+
+    def update_actual(self) -> None:
+        self.actual_voltage = self.power_supply.make_command(Commands.GET_VOLTS)
+        self.actual_voltage_label.configure(text=f"Voltage: {round(self.actual_voltage, 3)} V")
+        self.actual_current = self.power_supply.make_command(Commands.GET_CURR)
+        self.actual_current_label.configure(text=f"Current: {round(self.actual_current, 3)} A")
+        try:
+            self.actual_power = self.actual_voltage * self.actual_current
+        except ValueError:
+            # self.actual_voltage and self.actual_current are not floats
+            self.actual_power = 0
+        self.actual_power_label.configure(text=f"Power: {round(self.actual_power, 3)} W")
+        self.actual_mode = self.power_supply.make_command(Commands.GET_OUT_MODE)
+        self.actual_mode_label.configure(text=f"Mode: {self.actual_mode}")
+        self.app_window.after(100, self.update_actual)
 
     def update_noise(self) -> None:
         if self.noise_status.get() == "No Noise":
@@ -248,43 +276,49 @@ class Application:
             self.app_window,
             text = "Current"
         )
-        self.curr_frame.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.curr_frame.grid(row = 0, column = 1, padx = 10, pady = 10)
 
         self.add_noise_frame = ttk.LabelFrame(
             self.app_window,
             text = "Additive Noise"
         )
-        self.add_noise_frame.grid(row = 2, column = 0, padx = 10, pady = 10)
+        self.add_noise_frame.grid(row = 1, column = 0, padx = 10, pady = 10)
 
         self.mult_noise_frame = ttk.LabelFrame(
             self.app_window,
             text = "Multiplicative Noise"
         )
-        self.mult_noise_frame.grid(row = 3, column = 0, padx = 10, pady = 10)
+        self.mult_noise_frame.grid(row = 1, column = 1, padx = 10, pady = 10)
 
         self.on_frame = ttk.LabelFrame(
             self.app_window,
             text = "On/Off"
         )
-        self.on_frame.grid(row = 0, column = 1, padx = 10, pady = 10)
+        self.on_frame.grid(row = 2, column = 0, padx = 10, pady = 10)
 
         self.protocol_frame = ttk.LabelFrame(
             self.app_window,
             text = "Protocol"
         )
-        self.protocol_frame.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.protocol_frame.grid(row = 2, column = 1, padx = 10, pady = 10)
 
         self.power_frame = ttk.LabelFrame(
             self.app_window,
             text = "Power"
         )
-        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
+        self.power_frame.grid(row = 0, column = 2, padx = 10, pady = 10)
 
         self.noise_select_frame = ttk.LabelFrame(
             self.app_window,
             text = "Select Noise Type"
         )
-        self.power_frame.grid(row = 0, column = 3, padx = 10, pady = 10)
+        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
+
+        self.actual_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Actual Values Frame"
+        )
+        self.actual_frame.grid(row = 0, column = 3, padx = 10, pady = 10)
 
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
@@ -328,6 +362,27 @@ class Application:
             text="Currently using USB"
         )
         self.protocol_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.actual_voltage_label = ttk.Label(
+            self.actual_frame,
+            text="Voltage: 0 V"
+        )
+        self.actual_voltage_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.actual_current_label = ttk.Label(
+            self.actual_frame,
+            text="Current: 0 A"
+        )
+        self.actual_current_label.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.actual_power_label = ttk.Label(
+            self.actual_frame,
+            text="Power: 0 W"
+        )
+        self.actual_power_label.grid(row = 2, column = 0, padx = 10, pady = 10)
+
+        self.actual_mode_label = ttk.Label(
+            self.actual_frame,
+            text="Mode: Unknown"
+        )
+        self.actual_mode_label.grid(row = 3, column = 0, padx = 10, pady = 10)
 
     def load_sliders(self) -> None:
         self.volt_slider = tk.Scale(
