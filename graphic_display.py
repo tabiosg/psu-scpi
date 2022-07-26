@@ -251,11 +251,12 @@ class Application:
     def toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
         if self.protocol_button.config("text")[-1] == "USB":
-            self.volt_label.configure(text="Currently using USB")
+            self.protocol_label.configure(text="Currently using USB")
             self.protocol_button.config(text="ETHERNET")
             self.power_supply = PowerSupply(protocol=DebugProtocol())
         else:
-            self.protocol_button.config(text="Currently using Ethernet")
+            self.protocol_label.config(text="Currently using Ethernet")
+            self.protocol_button.config(text="USB")
             self.power_supply = PowerSupply(protocol=DebugProtocol())
 
     def load_on_switch(self) -> None:
