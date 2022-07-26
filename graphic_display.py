@@ -336,7 +336,7 @@ class Application:
 
         self.actual_frame = ttk.LabelFrame(
             self.app_window,
-            text = "Actual Values Frame"
+            text = "Actual Values"
         )
         self.actual_frame.grid(row = 0, column = 3, padx = 10, pady = 10)
 
