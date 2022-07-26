@@ -251,7 +251,7 @@ class Application:
         self.protocol_button = Button(
             self.protocol_frame,
             text="Change to Ethernet",
-            width=10,
+            width=20,
             command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 1, column = 0, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
