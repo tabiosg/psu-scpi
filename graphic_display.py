@@ -47,9 +47,9 @@ class Application:
     requested_voltage: float
     requested_current: float
     requested_mode_is_on: bool
-    actual_voltage: str
-    actual_current: str
-    actual_power: str
+    actual_voltage: float
+    actual_current: float
+    actual_power: float
     actual_mode: str
     power_supply: PowerSupply
 
@@ -82,9 +82,9 @@ class Application:
         self.requested_voltage = 0
         self.requested_current = 0
         self.requested_mode_is_on = False
-        self.actual_voltage = "0"
-        self.actual_current = "0"
-        self.actual_power = "0"
+        self.actual_voltage = 0
+        self.actual_current = 0
+        self.actual_power = 0
         self.actual_mode = "Unknown"
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
@@ -103,12 +103,12 @@ class Application:
 
     def update_actual(self) -> None:
         try:
-            self.actual_voltage = round(self.power_supply.make_command(Commands.GET_VOLTS), 3)
+            self.actual_voltage = round(float(self.power_supply.make_command(Commands.GET_VOLTS), 3))
         except ValueError:
             self.actual_voltage = round(random() * -1, 3)  # done for debugging purposes
         self.actual_voltage_label.configure(text=f"Voltage: {self.actual_voltage} V")
         try:
-            self.actual_current = self.power_supply.make_command(Commands.GET_CURR)
+            self.actual_current = round(float(self.power_supply.make_command(Commands.GET_CURR), 3))
         except ValueError:
             self.actual_current = round(random() * -1, 3)  # done for debugging purposes
         self.actual_current_label.configure(text=f"Current: {self.actual_current} A")
