@@ -40,6 +40,7 @@ class Application:
     noise_status: tk.StringVar
     requested_voltage: float
     requested_current: float
+    requested_mode_is_on: bool
     actual_voltage: str
     actual_current: str
     actual_power: str
@@ -74,6 +75,7 @@ class Application:
         self.noise_status = None
         self.requested_voltage = 0
         self.requested_current = 0
+        self.requested_mode_is_on = False
         self.actual_voltage = "0"
         self.actual_current = "0"
         self.actual_power = "0"
@@ -109,7 +111,9 @@ class Application:
         self.app_window.after(100, self.update_actual)
 
     def update_noise(self) -> None:
-        if self.noise_status.get() == "No Noise":
+        if not self.requested_mode_is_on:
+            pass
+        elif self.noise_status.get() == "No Noise":
             pass
         elif self.noise_status.get() == "Additive Noise":
             self.create_additive_noise(self.add_noise_slider.get())
@@ -182,7 +186,6 @@ class Application:
             label="Change mult noise slider resolution to 0.1",
             command=self.mult_noise_res_tenths)
         
-        # Right-click
         self.app_window.bind("<Button-3>", self.show_popup_menu)
 
     def show_popup_menu(self, event) -> None:
@@ -251,10 +254,12 @@ class Application:
 
     def toggle_on_switch(self) -> None:
         if self.on_button.config("text")[-1] == "ON":
+            self.requested_mode_is_on = True
             self.on_label.configure(text=f"Currently On")
             self.on_button.config(text="OFF")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
         else:
+            self.requested_mode_is_on = False
             self.on_label.configure(text=f"Currently Off")
             self.on_button.config(text="ON")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
@@ -268,13 +273,13 @@ class Application:
     def load_frames(self) -> None:
         self.volt_frame = ttk.LabelFrame(
             self.app_window,
-            text = "Voltage"
+            text = "Requested Voltage"
         )
         self.volt_frame.grid(row = 0, column = 0, padx = 10, pady = 10)
 
         self.curr_frame = ttk.LabelFrame(
             self.app_window,
-            text = "Current"
+            text = "Requested Current"
         )
         self.curr_frame.grid(row = 0, column = 1, padx = 10, pady = 10)
 
@@ -304,7 +309,7 @@ class Application:
 
         self.power_frame = ttk.LabelFrame(
             self.app_window,
-            text = "Power"
+            text = "Requested Power"
         )
         self.power_frame.grid(row = 0, column = 2, padx = 10, pady = 10)
 
