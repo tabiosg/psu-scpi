@@ -148,7 +148,7 @@ class Application:
         self.noise_status = tk.StringVar()
         self.noise_status.set(choices[0])
         self.noise_menu = tk.OptionMenu(self.noise_select_frame, self.noise_status, *choices)
-        self.noise_menu.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.noise_menu.grid(row = 0, column = 0, padx = 20, pady = 10)
 
     def load_popup_menu(self) -> None:
         self.popup_menu = tk.Menu(self.app_window, tearoff=False)
@@ -251,7 +251,7 @@ class Application:
             text="USB",
             width=10,
             command=self.toggle_protocol_switch)
-        self.protocol_button.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.protocol_button.grid(row = 1, column = 0, padx = 20, pady = 10)
         # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
@@ -268,21 +268,21 @@ class Application:
     def load_on_switch(self) -> None:
         self.on_button = Button(
             self.on_frame,
-            text="OFF",
+            text="Turn On",
             width=10,
             command=self.toggle_on_switch)
-        self.on_button.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.on_button.grid(row = 1, column = 0, padx = 20, pady = 10)
 
     def toggle_on_switch(self) -> None:
-        if self.on_button.config("text")[-1] == "ON":
+        if self.on_button.config("text")[-1] == "Turn On":
             self.requested_mode_is_on = True
             self.on_label.configure(text=f"Currently On")
-            self.on_button.config(text="OFF")
+            self.on_button.config(text="Turn Off")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
         else:
             self.requested_mode_is_on = False
             self.on_label.configure(text=f"Currently Off")
-            self.on_button.config(text="ON")
+            self.on_button.config(text="Turn On")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
 
     def load_app_window(self) -> None:
@@ -296,119 +296,119 @@ class Application:
             self.app_window,
             text = "Requested Voltage"
         )
-        self.volt_frame.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.volt_frame.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.curr_frame = ttk.LabelFrame(
             self.app_window,
             text = "Requested Current"
         )
-        self.curr_frame.grid(row = 0, column = 1, padx = 10, pady = 10)
+        self.curr_frame.grid(row = 0, column = 1, padx = 20, pady = 10)
 
         self.add_noise_frame = ttk.LabelFrame(
             self.app_window,
             text = "Additive Noise"
         )
-        self.add_noise_frame.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.add_noise_frame.grid(row = 1, column = 0, padx = 20, pady = 10)
 
         self.mult_noise_frame = ttk.LabelFrame(
             self.app_window,
             text = "Multiplicative Noise"
         )
-        self.mult_noise_frame.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.mult_noise_frame.grid(row = 1, column = 1, padx = 20, pady = 10)
 
         self.on_frame = ttk.LabelFrame(
             self.app_window,
             text = "On/Off"
         )
-        self.on_frame.grid(row = 2, column = 0, padx = 10, pady = 10)
+        self.on_frame.grid(row = 2, column = 0, padx = 20, pady = 10)
 
         self.protocol_frame = ttk.LabelFrame(
             self.app_window,
             text = "Protocol"
         )
-        self.protocol_frame.grid(row = 2, column = 1, padx = 10, pady = 10)
+        self.protocol_frame.grid(row = 2, column = 1, padx = 20, pady = 10)
 
         self.power_frame = ttk.LabelFrame(
             self.app_window,
             text = "Requested Power"
         )
-        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
+        self.power_frame.grid(row = 1, column = 2, padx = 20, pady = 10)
 
         self.noise_select_frame = ttk.LabelFrame(
             self.app_window,
             text = "Select Noise Type"
         )
-        self.noise_select_frame.grid(row = 0, column = 2, padx = 10, pady = 10)
+        self.noise_select_frame.grid(row = 0, column = 2, padx = 20, pady = 10)
 
         self.actual_frame = ttk.LabelFrame(
             self.app_window,
             text = "Actual Values"
         )
-        self.actual_frame.grid(row = 0, column = 3, padx = 10, pady = 10)
+        self.actual_frame.grid(row = 0, column = 3, padx = 20, pady = 10)
 
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
             self.volt_frame,
             text=f"Voltage: {self.volt_slider.get()} V"
         )
-        self.volt_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.volt_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.curr_label = ttk.Label(
             self.curr_frame,
             text=f"Curent: {self.curr_slider.get()} A"
         )
-        self.curr_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.curr_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.add_noise_label = ttk.Label(
             self.add_noise_frame,
             text=self.add_noise_slider.get()
         )
-        self.add_noise_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.add_noise_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.mult_noise_label = ttk.Label(
             self.mult_noise_frame,
             text=self.mult_noise_slider.get()
         )
-        self.mult_noise_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.mult_noise_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.power_label = ttk.Label(
             self.power_frame,
             text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)} W"
         )
-        self.power_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.power_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.on_label = ttk.Label(
             self.on_frame,
             text="Currently Off"
         )
-        self.on_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.on_label.grid(row = 0, column = 0, padx = 20, pady = 10)
 
         self.protocol_label = ttk.Label(
             self.protocol_frame,
             text="Currently using USB"
         )
-        self.protocol_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.protocol_label.grid(row = 0, column = 0, padx = 20, pady = 10)
         self.actual_voltage_label = ttk.Label(
             self.actual_frame,
             text="Voltage: 0 V"
         )
-        self.actual_voltage_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self.actual_voltage_label.grid(row = 0, column = 0, padx = 20, pady = 10)
         self.actual_current_label = ttk.Label(
             self.actual_frame,
             text="Current: 0 A"
         )
-        self.actual_current_label.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.actual_current_label.grid(row = 1, column = 0, padx = 20, pady = 10)
         self.actual_power_label = ttk.Label(
             self.actual_frame,
             text="Power: 0 W"
         )
-        self.actual_power_label.grid(row = 2, column = 0, padx = 10, pady = 10)
+        self.actual_power_label.grid(row = 2, column = 0, padx = 20, pady = 10)
 
         self.actual_mode_label = ttk.Label(
             self.actual_frame,
             text="Mode: Unknown"
         )
-        self.actual_mode_label.grid(row = 3, column = 0, padx = 10, pady = 10)
+        self.actual_mode_label.grid(row = 3, column = 0, padx = 20, pady = 10)
 
     def load_sliders(self) -> None:
         self.volt_slider = tk.Scale(
@@ -419,7 +419,7 @@ class Application:
             resolution=0.001,
             command=self.volt_slider_changed
         )
-        self.volt_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.volt_slider.grid(row = 1, column = 0, padx = 20, pady = 10)
 
         self.curr_slider = tk.Scale(
             self.curr_frame,
@@ -429,7 +429,7 @@ class Application:
             resolution=0.001,
             command=self.curr_slider_changed
         )
-        self.curr_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.curr_slider.grid(row = 1, column = 0, padx = 20, pady = 10)
 
         self.add_noise_slider = tk.Scale(
             self.add_noise_frame,
@@ -439,7 +439,7 @@ class Application:
             resolution=0.001,
             command=self.add_noise_slider_changed
         )
-        self.add_noise_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.add_noise_slider.grid(row = 1, column = 0, padx = 20, pady = 10)
 
         self.mult_noise_slider = tk.Scale(
             self.mult_noise_frame,
@@ -449,7 +449,7 @@ class Application:
             resolution=0.001,
             command=self.mult_noise_slider_changed
         )
-        self.mult_noise_slider.grid(row = 3, column = 0, padx = 10, pady = 10)
+        self.mult_noise_slider.grid(row = 3, column = 0, padx = 20, pady = 10)
 
     def change_volt(self, volt: float) -> None:
         if (volt < 0 or volt > 80):
