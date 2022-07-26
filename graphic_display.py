@@ -15,6 +15,8 @@ class Application:
     add_noise_frame: ttk.Frame
     mult_noise_frame: ttk.Frame
     power_frame: ttk.Frame
+    on_frame: ttk.LabelFrame
+    protocol_frame: ttk.LabelFrame
     volt_slider: tk.Scale
     curr_slider: tk.Scale
     add_noise_slider: tk.Scale
@@ -24,6 +26,8 @@ class Application:
     add_noise_label: ttk.Label
     mult_noise_label: ttk.Label
     power_label: ttk.Label
+    on_label: ttk.Label
+    protocol_label: ttk.Label
     on_button: ttk.Button
     protocol_button: ttk.Button
     popup_menu: tk.Menu
@@ -40,6 +44,8 @@ class Application:
         self.power_frame = None
         self.add_noise_frame = None
         self.mult_noise_frame = None
+        self.on_frame = None
+        self.protocol_frame = None
         self.volt_slider = None
         self.curr_slider = None
         self.add_noise_slider = None
@@ -49,6 +55,8 @@ class Application:
         self.add_noise_label = None
         self.mult_noise_label = None
         self.power_label = None
+        self.on_label = None
+        self.protocol_label = None
         self.on_button = None
         self.protocol_button = None
         self.popup_menu = None
@@ -194,28 +202,31 @@ class Application:
 
     def load_protocol_switch(self) -> None:
         self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
-        self.protocol_button.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.protocol_button.grid(row = 1, column = 0, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
 
     def toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
-        if self.protocol_button.config('text')[-1] == 'USB':
-            self.protocol_button.config(text='ETHERNET')
+        if self.protocol_button.config("text")[-1] == "USB":
+            self.volt_label.configure(text="Currently using USB")
+            self.protocol_button.config(text="ETHERNET")
             self.power_supply = PowerSupply(protocol=DebugProtocol())
         else:
-            self.protocol_button.config(text='USB')
+            self.protocol_button.config(text="Currently using Ethernet")
             self.power_supply = PowerSupply(protocol=DebugProtocol())
 
     def load_on_switch(self) -> None:
         self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
-        self.on_button.grid(row = 0, column = 1, padx = 10, pady = 10)
+        self.on_button.grid(row = 1, column = 0, padx = 10, pady = 10)
 
     def toggle_on_switch(self) -> None:
-        if self.on_button.config('text')[-1] == 'ON':
-            self.on_button.config(text='OFF')
+        if self.on_button.config("text")[-1] == "ON":
+            self.on_label.configure(text=f"Currently On")
+            self.on_button.config(text="OFF")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
         else:
-            self.on_button.config(text='ON')
+            self.on_label.configure(text=f"Currently Off")
+            self.on_button.config(text="ON")
             self.power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
 
     def load_app_window(self) -> None:
@@ -249,6 +260,18 @@ class Application:
         )
         self.mult_noise_frame.grid(row = 3, column = 0, padx = 10, pady = 10)
 
+        self.on_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "On/Off"
+        )
+        self.on_frame.grid(row = 0, column = 1, padx = 10, pady = 10)
+
+        self.protocol_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Protocol"
+        )
+        self.protocol_frame.grid(row = 1, column = 1, padx = 10, pady = 10)
+
         self.power_frame = ttk.LabelFrame(
             self.app_window,
             text = "Power"
@@ -278,7 +301,7 @@ class Application:
             self.mult_noise_frame,
             text=self.mult_noise_slider.get()
         )
-        self.mult_noise_label.grid(row = 2, column = 0, padx = 10, pady = 10)
+        self.mult_noise_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
         self.power_label = ttk.Label(
             self.power_frame,
@@ -286,12 +309,24 @@ class Application:
         )
         self.power_label.grid(row = 0, column = 0, padx = 10, pady = 10)
 
+        self.on_label = ttk.Label(
+            self.on_frame,
+            text="Currently Off"
+        )
+        self.on_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+
+        self.protocol_label = ttk.Label(
+            self.protocol_frame,
+            text="Currently using USB"
+        )
+        self.protocol_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+
     def load_sliders(self) -> None:
         self.volt_slider = tk.Scale(
             self.volt_frame,
             from_=0,
             to=80,
-            orient='horizontal',
+            orient="horizontal",
             resolution=0.001,
             command=self.volt_slider_changed
         )
@@ -301,7 +336,7 @@ class Application:
             self.curr_frame,
             from_=0,
             to=120,
-            orient='horizontal',
+            orient="horizontal",
             resolution=0.001,
             command=self.curr_slider_changed
         )
@@ -311,7 +346,7 @@ class Application:
             self.add_noise_frame,
             from_=0,
             to=1,
-            orient='horizontal',
+            orient="horizontal",
             resolution=0.001,
             command=self.add_noise_slider_changed
         )
@@ -321,7 +356,7 @@ class Application:
             self.mult_noise_frame,
             from_=0,
             to=0.4,
-            orient='horizontal',
+            orient="horizontal",
             resolution=0.001,
             command=self.mult_noise_slider_changed
         )
