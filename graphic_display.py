@@ -119,11 +119,11 @@ class Application:
     def update_noise(self) -> None:
         if not self.requested_mode_is_on:
             pass
-        elif self.noise_status.get() == "No Noise":
+        elif self.noise_status.get() == "None":
             pass
-        elif self.noise_status.get() == "Additive Noise":
+        elif self.noise_status.get() == "Additive":
             self.create_additive_noise(self.add_noise_slider.get())
-        elif self.noise_status.get() == "Multiplicative Noise":
+        elif self.noise_status.get() == "Multiplicative":
             self.create_mult_noise(self.mult_noise_slider.get())
         self.app_window.after(100, self.update_noise)
 
@@ -138,7 +138,7 @@ class Application:
         self.load_noise_menu()
 
     def load_noise_menu(self) -> None:
-        choices = ["No Noise", "Additive Noise", "Multiplicative Noise"]
+        choices = ["None", "Additive", "Multiplicative"]
         self.noise_status = tk.StringVar()
         self.noise_status.set(choices[0])
         self.noise_menu = tk.OptionMenu(self.noise_select_frame, self.noise_status, *choices)
