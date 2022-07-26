@@ -12,11 +12,17 @@ class Application:
     app_window: tk.Tk
     volt_frame: ttk.Frame
     curr_frame: ttk.Frame
+    add_noise_frame: ttk.Frame
+    mult_noise_frame: ttk.Frame
     power_frame: ttk.Frame
     volt_slider: tk.Scale
     curr_slider: tk.Scale
+    add_noise_slider: tk.Scale
+    mult_noise_slider: tk.Scale
     volt_label: ttk.Label
     curr_label: ttk.Label
+    add_noise_label: ttk.Label
+    mult_noise_label: ttk.Label
     power_label: ttk.Label
     on_button: ttk.Button
     protocol_button: ttk.Button
@@ -30,10 +36,16 @@ class Application:
         self.volt_frame = None
         self.curr_frame = None
         self.power_frame = None
+        self.add_noise_frame = None
+        self.mult_noise_frame = None
         self.volt_slider = None
         self.curr_slider = None
+        self.add_noise_slider = None
+        self.mult_noise_slider = None
         self.volt_label = None
         self.curr_label = None
+        self.add_noise_label = None
+        self.mult_noise_label = None
         self.power_label = None
         self.on_button = None
         self.protocol_button = None
@@ -58,9 +70,9 @@ class Application:
         if self.noise_status.get() == "No Noise":
             pass
         elif self.noise_status.get() == "Additive Noise":
-            self.create_additive_noise(1)
+            self.create_additive_noise(self.add_noise_slider.get())
         elif self.noise_status.get() == "Multiplicative Noise":
-            self.create_mult_noise(1)
+            self.create_mult_noise(self.mult_noise_slider.get())
         self.app_window.after(100, self.update_noise)
 
     def load_all_graphics(self) -> None:
@@ -185,6 +197,18 @@ class Application:
         )
         self.curr_frame.grid(row = 1, column = 0, padx = 10, pady = 10)
 
+        self.add_noise_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Additive Noise"
+        )
+        self.add_noise_frame.grid(row = 2, column = 0, padx = 10, pady = 10)
+
+        self.mult_noise_frame = ttk.LabelFrame(
+            self.app_window,
+            text = "Multiplicative Noise"
+        )
+        self.mult_noise_frame.grid(row = 3, column = 0, padx = 10, pady = 10)
+
         self.power_frame = ttk.LabelFrame(
             self.app_window,
             text = "Power"
@@ -203,6 +227,18 @@ class Application:
             text=self.curr_slider.get()
         )
         self.curr_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+
+        self.add_noise_label = ttk.Label(
+            self.add_noise_frame,
+            text=self.add_noise_slider.get()
+        )
+        self.add_noise_label.grid(row = 0, column = 0, padx = 10, pady = 10)
+
+        self.mult_noise_label = ttk.Label(
+            self.mult_noise_frame,
+            text=self.mult_noise_slider.get()
+        )
+        self.mult_noise_label.grid(row = 2, column = 0, padx = 10, pady = 10)
 
         self.power_label = ttk.Label(
             self.power_frame,
@@ -231,6 +267,26 @@ class Application:
         )
         self.curr_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
 
+        self.add_noise_slider = tk.Scale(
+            self.add_noise_frame,
+            from_=0,
+            to=1,
+            orient='horizontal',
+            resolution=0.001,
+            command=self.add_noise_slider_changed
+        )
+        self.add_noise_slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+
+        self.mult_noise_slider = tk.Scale(
+            self.mult_noise_frame,
+            from_=0,
+            to=0.4,
+            orient='horizontal',
+            resolution=0.001,
+            command=self.mult_noise_slider_changed
+        )
+        self.mult_noise_slider.grid(row = 3, column = 0, padx = 10, pady = 10)
+
     def change_volt(self, volt: float) -> None:
         if (volt < 0 or volt > 80):
             return
@@ -251,9 +307,29 @@ class Application:
     def curr_slider_changed(self, event) -> None:
         self.change_curr(self.curr_slider.get())
 
+    def change_add_noise(self, add_noise: float) -> None:
+        if(add_noise < 0 or add_noise > 1):
+            return
+        self.add_noise_label.configure(
+            text=f"{round(add_noise, 3)}"
+        )
+
+    def add_noise_slider_changed(self, event) -> None:
+        self.change_add_noise(self.add_noise_slider.get())
+
+    def change_mult_noise(self, mult_noise: float) -> None:
+        if(mult_noise < 0 or mult_noise > 0.4):
+            return
+        self.mult_noise_label.configure(
+            text=f"{round(mult_noise, 3)}"
+        )
+
+    def mult_noise_slider_changed(self, event) -> None:
+        self.change_mult_noise(self.mult_noise_slider.get())
+
     def update_power(self) -> None:
         self.power_label.configure(
-            text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)}W"
+            text=f"Power: {round(self.volt_slider.get() * self.curr_slider.get(), 3)} W"
         )
 
     def create_additive_noise(self, add_factor: float) -> None:
