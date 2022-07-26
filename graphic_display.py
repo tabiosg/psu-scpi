@@ -10,6 +10,7 @@ from power_supply import (Commands, DebugProtocol, EthernetProtocol,
 class Application:
 
     app_window: tk.Tk
+    
     volt_frame: ttk.Frame
     curr_frame: ttk.Frame
     add_noise_frame: ttk.Frame
@@ -19,10 +20,12 @@ class Application:
     protocol_frame: ttk.Frame
     noise_select_frame: ttk.Frame
     actual_frame: ttk.Frame
+
     volt_slider: tk.Scale
     curr_slider: tk.Scale
     add_noise_slider: tk.Scale
     mult_noise_slider: tk.Scale
+
     volt_label: ttk.Label
     curr_label: ttk.Label
     add_noise_label: ttk.Label
@@ -33,10 +36,13 @@ class Application:
     actual_voltage_label: ttk.Label
     actual_current_label: ttk.Label
     actual_power_label: ttk.Label
+
     on_button: ttk.Button
     protocol_button: ttk.Button
+
     popup_menu: tk.Menu
     noise_menu: tk.OptionMenu
+
     noise_status: tk.StringVar
     requested_voltage: float
     requested_current: float
@@ -234,7 +240,11 @@ class Application:
         self.mult_noise_slider.configure(resolution = 0.1)
 
     def load_protocol_switch(self) -> None:
-        self.protocol_button = Button(text="USB", width=10, command=self.toggle_protocol_switch)
+        self.protocol_button = Button(
+            self.protocol_frame,
+            text="USB",
+            width=10,
+            command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 1, column = 0, padx = 10, pady = 10)
         # self.protocol_button.pack(pady=10)
 
@@ -249,7 +259,11 @@ class Application:
             self.power_supply = PowerSupply(protocol=DebugProtocol())
 
     def load_on_switch(self) -> None:
-        self.on_button = Button(text="OFF", width=10, command=self.toggle_on_switch)
+        self.on_button = Button(
+            self.on_frame,
+            text="OFF",
+            width=10,
+            command=self.toggle_on_switch)
         self.on_button.grid(row = 1, column = 0, padx = 10, pady = 10)
 
     def toggle_on_switch(self) -> None:
@@ -311,13 +325,13 @@ class Application:
             self.app_window,
             text = "Requested Power"
         )
-        self.power_frame.grid(row = 0, column = 2, padx = 10, pady = 10)
+        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
 
         self.noise_select_frame = ttk.LabelFrame(
             self.app_window,
             text = "Select Noise Type"
         )
-        self.power_frame.grid(row = 1, column = 2, padx = 10, pady = 10)
+        self.noise_select_frame.grid(row = 0, column = 2, padx = 10, pady = 10)
 
         self.actual_frame = ttk.LabelFrame(
             self.app_window,
