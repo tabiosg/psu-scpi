@@ -19,10 +19,11 @@ class Application:
     add_curr_noise_frame: ttk.Frame
     mult_curr_noise_frame: ttk.Frame
     power_frame: ttk.Frame
-    on_frame: ttk.Frame
-    protocol_frame: ttk.Frame
     noise_select_frame: ttk.Frame
     actual_frame: ttk.Frame
+    on_frame: ttk.Frame
+    protocol_frame: ttk.Frame
+    voltage_current_constant_frame: ttk.Frame
 
     volt_slider: tk.Scale
     curr_slider: tk.Scale
@@ -45,10 +46,12 @@ class Application:
     actual_current_label: ttk.Label
     actual_power_label: ttk.Label
     constant_power_label: ttk.Label
+    voltage_current_constant_label: ttk.Label
 
     on_button: ttk.Button
     protocol_button: ttk.Button
     constant_power_button: ttk.Button
+    voltage_current_constant_button: ttk.Button
 
     popup_menu: tk.Menu
     noise_menu: tk.OptionMenu
@@ -63,6 +66,7 @@ class Application:
     actual_power: float
     actual_mode: str
     constant_power: bool
+    constant_voltage: bool
     power_supply: PowerSupply
 
     def __init__(self) -> None:
@@ -78,6 +82,7 @@ class Application:
         self.protocol_frame = None
         self.noise_select_frame = None
         self.constant_power_frame = None
+        self.voltage_current_constant_frame = None
         self.volt_slider = None
         self.curr_slider = None
         self.power_slider = None
@@ -98,9 +103,11 @@ class Application:
         self.actual_current_label = None
         self.actual_power_label = None
         self.constant_power_label = None
+        self.voltage_current_constant_label = None
         self.on_button = None
         self.protocol_button = None
         self.constant_power_button = None
+        self.voltage_current_constant_button = None
         self.popup_menu = None
         self.noise_menu = None
         self.noise_status = None
@@ -112,6 +119,7 @@ class Application:
         self.actual_current = 0
         self.actual_power = 0
         self.constant_power = False
+        self.constant_voltage = True
         self.actual_mode = "Unknown"
         self.power_supply = PowerSupply(protocol=DebugProtocol())
         self.load_all_graphics()
@@ -130,23 +138,23 @@ class Application:
 
     def update_actual(self) -> None:
         try:
-            self.actual_voltage = round(float(self.power_supply.make_command(Commands.GET_VOLTS)), 3)
+            self.actual_voltage = float(self.power_supply.make_command(Commands.GET_VOLTS)), 3
         except ValueError:
             # falls here since make_command for debugging is not real
             self.actual_voltage = round(random() * -1, 3)  # done for debugging purposes
-        self.actual_voltage_label.configure(text=f"Voltage: {self.actual_voltage} V")
+        self.actual_voltage_label.configure(text=f"Voltage: {round(self.actual_voltage, 3)} V")
         try:
-            self.actual_current = round(float(self.power_supply.make_command(Commands.GET_CURR)), 3)
+            self.actual_current = float(self.power_supply.make_command(Commands.GET_CURR)), 3
         except ValueError:
             # falls here since make_command for debugging is not real
             self.actual_current = round(random() * -1, 3)  # done for debugging purposes
-        self.actual_current_label.configure(text=f"Current: {self.actual_current} A")
+        self.actual_current_label.configure(text=f"Current: {round(self.actual_current, 3)} A")
         try:
-            self.actual_power = round(self.actual_voltage * self.actual_current, 3)
+            self.actual_power = self.actual_voltage * self.actual_current
         except ValueError:
             # should no longer enter here
             self.actual_power = 0
-        self.actual_power_label.configure(text=f"Power: {self.actual_power} W")
+        self.actual_power_label.configure(text=f"Power: {round(self.actual_power, 3)} W")
         self.actual_mode = self.power_supply.make_command(Commands.GET_OUT_MODE)
         self.actual_mode_label.configure(text=f"Mode: {self.actual_mode}")
         self.app_window.after(100, self.update_actual)
@@ -184,6 +192,7 @@ class Application:
         self.on_button = self.create_switch(self.on_frame, "Turn on", self.toggle_on_switch)
         self.protocol_button = self.create_switch(self.protocol_frame, "Change to Ethernet", self.toggle_protocol_switch)
         self.constant_power_button = self.create_switch(self.constant_power_frame, "Change to constant power", self.toggle_constant_power_switch)
+        self.voltage_current_constant_button = self.create_switch(self.voltage_current_constant_frame, "Change to constant current", self.toggle_voltage_current_constant_switch)
 
     def load_noise_menu(self) -> None:
         choices = ["None", "Additive", "Multiplicative"]
@@ -290,14 +299,26 @@ class Application:
     def mult_noise_res_tenths(self) -> None:
         self.change_slider_resolution(self.mult_volt_noise_slider, 0.1)
 
+    def toggle_voltage_current_constant_switch(self) -> None:
+        if self.voltage_current_constant_button.config("text")[-1] == "Change to constant current":
+            self.constant_voltage = False
+            self.voltage_current_constant_label.configure(text="Currently using constant current")
+            self.voltage_current_constant_button.config(text="Change to constant voltage")
+        else:
+            self.constant_voltage = True
+            self.voltage_current_constant_label.config(text="Currently using constant voltage")
+            self.voltage_current_constant_button.config(text="Change to constant current")
+
     def toggle_constant_power_switch(self) -> None:
         if self.constant_power_button.config("text")[-1] == "Change to constant power":
             self.constant_power = True
             self.constant_power_label.configure(text="Currently using constant power")
+            self.power_slider.pack()
             self.constant_power_button.config(text="Change to variable power")
         else:
             self.constant_power = False
             self.constant_power_label.config(text="Currently using variable power")
+            self.power_slider.pack_forget()
             self.constant_power_button.config(text="Change to constant power")
 
     def toggle_protocol_switch(self) -> None:
@@ -351,6 +372,7 @@ class Application:
         self.constant_power_frame = self.create_frame("Select Constant/Variable Power", 2, 2)
         self.on_frame = self.create_frame("Select On/Off", 3, 0)
         self.protocol_frame = self.create_frame("Select Protocol", 3, 1)
+        self.voltage_current_constant_frame = self.create_frame("Keep Voltage/Current Constant When Changing Power", 3, 2)
 
     def create_label(self, frame: tk.Frame, text: str, row: int) -> ttk.Label:
         label = ttk.Label(
@@ -375,6 +397,7 @@ class Application:
         self.actual_power_label = self.create_label(self.actual_frame, "Power: 0 W", 2)
         self.actual_mode_label = self.create_label(self.actual_frame, "Mode: Unknown", 3)
         self.constant_power_label = self.create_label(self.constant_power_frame, "Currently using constant power", 0)
+        self.voltage_current_constant_label = self.create_label(self.voltage_current_constant_frame, "Currently using constant voltage", 0)
 
     def create_slider(self, frame: ttk.Frame, max: float, cmd: Callable) -> tk.Scale:
         slider = tk.Scale(
@@ -392,6 +415,7 @@ class Application:
         self.volt_slider = self.create_slider(self.volt_frame, 80, self.volt_slider_changed)
         self.curr_slider = self.create_slider(self.curr_frame, 120, self.curr_slider_changed)
         self.power_slider = self.create_slider(self.power_frame, 3000, self.power_slider_changed)
+        self.power_slider.pack_forget()
         self.add_volt_noise_slider = self.create_slider(self.add_volt_noise_frame, 1, self.add_volt_noise_slider_changed)
         self.mult_volt_noise_slider = self.create_slider(self.mult_volt_noise_frame, 0.4, self.mult_volt_noise_slider_changed)
         self.add_curr_noise_slider = self.create_slider(self.add_curr_noise_frame, 1, self.add_curr_noise_slider_changed)
@@ -400,9 +424,10 @@ class Application:
     def change_volt(self, volt: float) -> None:
         if (volt < 0 or volt > 80):
             return
+        volt = max(volt, 3000.0 / self.requested_current)
         self.volt_label.configure(text=f"Voltage: {round(volt, 3)} V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
-        self.requested_voltage = round(volt, 3)
+        self.requested_voltage = volt
         self.update_power()
 
     def volt_slider_changed(self, event) -> None:
@@ -422,16 +447,17 @@ class Application:
     def change_curr(self, curr: float) -> None:
         if (curr < 0 or curr > 120):
             return
+        curr = max(curr, 3000.0 / self.requested_voltage)
         self.curr_label.configure(text=f"Current: {round(curr, 3)} A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
-        self.requested_current = round(curr, 3)
+        self.requested_current = curr
         self.update_power()
 
     def curr_slider_changed(self, event) -> None:
         previous_current = self.requested_current
         self.requested_current = self.curr_slider.get()
         if self.requested_current <= previous_current:
-            # If we are dropping in current, it is  safe.
+            # If we are dropping in current, it is safe.
             # We do this since if voltage is already high and current wants to go high,
             # we should not bump up both values until one of the values is low.
             self.change_curr(self.requested_current)
@@ -445,10 +471,12 @@ class Application:
         self.requested_power = self.power_slider.get()
         if not self.constant_power:
             return
-        # TODO - by default, just keep current constant and change voltage if they move the power slider.
-        # but we may want to change in the future and give the user options
-        self.requested_voltage = self.requested_power / self.requested_current
-        self.change_volt(self.requested_voltage)
+        if self.constant_voltage:
+            self.requested_current = self.requested_power / self.requested_voltage
+            self.change_volt(self.requested_current)
+        if not self.constant_voltage:
+            self.requested_voltage = self.requested_power / self.requested_current
+            self.change_volt(self.requested_voltage)
 
     def change_add_volt_noise(self, add_noise: float) -> None:
         if(add_noise < 0 or add_noise > 1):
