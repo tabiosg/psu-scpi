@@ -185,12 +185,12 @@ class Application:
             command=self.toggle_protocol_switch)
         self.protocol_button.grid(row = 1, column = 0, padx = 10, pady = 10)
 
-        self.constant_power = Button(
+        self.constant_power_button = Button(
             self.constant_power_frame,
             text="Change to constant power",
             width=20,
             command=self.toggle_constant_power_switch)
-        self.constant_power.grid(row = 1, column = 0, padx = 10, pady = 10)
+        self.constant_power_button.grid(row = 1, column = 0, padx = 10, pady = 10)
 
     def load_noise_menu(self) -> None:
         choices = ["None", "Additive", "Multiplicative"]
@@ -416,7 +416,7 @@ class Application:
             width = 150,
             text = "Select Constant/Variable Power"
         )
-        self.noise_select_frame.grid(row = 2, column = 2, padx = 10, pady = 10)
+        self.constant_power_frame.grid(row = 2, column = 2, padx = 10, pady = 10)
 
     def load_labels(self) -> None:
         self.volt_label = ttk.Label(
@@ -582,15 +582,15 @@ class Application:
     def volt_slider_changed(self, event) -> None:
         previous_voltage = self.requested_voltage
         self.requested_voltage = self.volt_slider.get()
-        if self.requested_voltage <= self.previous_voltage:
+        if self.requested_voltage <= previous_voltage:
             # If we are dropping in voltage, it is safe.
             # We do this since if current is already high and voltage wants to go high,
             # we should not bump up both values until one of the values is low.
             self.change_volt(self.requested_voltage)
-        if self.constant_power_label:
+        if self.constant_power:
             self.requested_current = self.requested_power / self.requested_voltage
             self.change_curr(self.requested_current)
-        if previous_voltage <= self.requested_voltage:
+        if previous_voltage < self.requested_voltage:
             self.change_volt(self.requested_voltage)
 
     def change_curr(self, curr: float) -> None:
@@ -604,15 +604,15 @@ class Application:
     def curr_slider_changed(self, event) -> None:
         previous_current = self.requested_current
         self.requested_current = self.curr_slider.get()
-        if self.requested_current <= self.previous_current:
+        if self.requested_current <= previous_current:
             # If we are dropping in current, it is  safe.
             # We do this since if voltage is already high and current wants to go high,
             # we should not bump up both values until one of the values is low.
             self.change_curr(self.requested_current)
-        if self.constant_power_label:
+        if self.constant_power:
             self.requested_voltage = self.requested_power / self.requested_current
             self.change_volt(self.requested_voltage)
-        if previous_current <= self.requested_current:
+        if previous_current < self.requested_current:
             self.change_curr(self.requested_current)
 
     def power_slider_changed(self, event) -> None:
@@ -620,30 +620,31 @@ class Application:
         if not self.constant_power:
             return
         # TODO - by default, just keep current constant and change voltage if they move the power slider.
+        # but we may want to change in the future and give the user options
         self.requested_voltage = self.requested_power / self.requested_current
         self.change_volt(self.requested_voltage)
 
-    def change_volt_add_noise(self, add_noise: float) -> None:
+    def change_add_volt_noise(self, add_noise: float) -> None:
         if(add_noise < 0 or add_noise > 1):
             return
         self.add_volt_noise_label.configure(
-            text=f"{round(add_noise, 3)}"
+            text=f"Add Volt Noise: {round(add_noise, 3)}"
         )
 
     def add_volt_noise_slider_changed(self, event) -> None:
-        self.change_volt_add_noise(self.add_volt_noise_slider.get())
+        self.change_add_volt_noise(self.add_volt_noise_slider.get())
 
-    def change_curr_add_noise(self, add_noise: float) -> None:
+    def change_add_curr_noise(self, add_noise: float) -> None:
         if(add_noise < 0 or add_noise > 1):
             return
         self.add_curr_noise_label.configure(
-            text=f"{round(add_noise, 3)}"
+            text=f"Add Curr Noise: {round(add_noise, 3)}"
         )
 
     def add_curr_noise_slider_changed(self, event) -> None:
-        self.change_curr_add_noise(self.add_curr_noise_slider.get())
+        self.change_add_curr_noise(self.add_curr_noise_slider.get())
 
-    def change_volt_mult_noise(self, mult_noise: float) -> None:
+    def change_mult_volt_noise(self, mult_noise: float) -> None:
         if(mult_noise < 0 or mult_noise > 0.4):
             return
         self.mult_volt_noise_label.configure(
@@ -651,17 +652,17 @@ class Application:
         )
 
     def mult_volt_noise_slider_changed(self, event) -> None:
-        self.change_volt_mult_noise(self.mult_volt_noise_slider.get())
+        self.change_mult_volt_noise(self.mult_volt_noise_slider.get())
 
-    def change_curr_mult_noise(self, mult_noise: float) -> None:
+    def change_mult_curr_noise(self, mult_noise: float) -> None:
         if(mult_noise < 0 or mult_noise > 0.4):
             return
         self.mult_curr_noise_label.configure(
-            text=f"{round(mult_noise, 3)}"
+            text=f"Mult Curr Noise: {round(mult_noise, 3)}"
         )
 
     def mult_curr_noise_slider_changed(self, event) -> None:
-        self.change_curr_mult_noise(self.mult_curr_noise_slider.get())        
+        self.change_mult_curr_noise(self.mult_curr_noise_slider.get())        
 
     def update_power(self) -> None:
         self.power_label.configure(
@@ -669,24 +670,24 @@ class Application:
         )
 
     def create_additive_noise(self) -> None:
-        volt_add_factor = self.add_volt_noise_slider.get()
-        self.change_volt(self.requested_voltage + (random() - 0.5)*volt_add_factor)
+        add_volt_factor = self.add_volt_noise_slider.get()
+        self.change_volt(self.requested_voltage + (random() - 0.5)*add_volt_factor)
 
-        curr_add_factor = self.add_curr_noise_slider.get()
-        self.change_curr(self.requested_current + (random() - 0.5)*curr_add_factor)
+        add_curr_factor = self.add_curr_noise_slider.get()
+        self.change_curr(self.requested_current + (random() - 0.5)*add_curr_factor)
 
     def create_mult_noise(self) -> None:
-        volt_mult_factor = self.mult_volt_noise_slider.get()
+        mult_volt_factor = self.mult_volt_noise_slider.get()
         # expect mult_factor to be a number between 0 and 1, most definitely closer to 0 though)
         self.change_volt(
             self.requested_voltage
-            * (1 + (random() - 0.5)*volt_mult_factor)
+            * (1 + (random() - 0.5)*mult_volt_factor)
         )
 
-        curr_mult_factor = self.mult_curr_noise_slider.get()
+        mult_curr_factor = self.mult_curr_noise_slider.get()
         self.change_curr(
             self.requested_current
-            * (1 + (random() - 0.5)*curr_mult_factor)
+            * (1 + (random() - 0.5)*mult_curr_factor)
         )
 
 def main():
