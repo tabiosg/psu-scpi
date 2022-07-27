@@ -177,7 +177,7 @@ class Application:
             text=text,
             width=10,
             command=cmd)
-        button.grid(row = 1, column = 0, padx = 10, pady = 10)
+        button.grid(row = 1, column = 0, padx = 10, pady = 10, sticky = "NSEW")
         return button
 
     def load_switches(self) -> None:
@@ -354,7 +354,7 @@ class Application:
 
     def create_label(self, frame: tk.Frame, text: str, row: int) -> ttk.Label:
         label = ttk.Label(
-            self.frame,
+            frame,
             text=text
         )
         label.grid(row=row, column=0, padx=10, pady=10)
