@@ -44,16 +44,6 @@ wxPython for graphics
 
 lex and yacc are interesting
 
-What happens if voltage and power exceed power? Should we prevent this from happening in the first place?
-
-When adding noise, do you change voltage? current? both?
-
-for code, make it alphabetical
-
 to create .exe do the following
 
 python3 -m PyInstaller --onefile --windowed graphic_display.py 
-
-TODO - alphabetical
-format code since it is a mess
-allow custom max values (instead of 3kw, 80, and 120)
