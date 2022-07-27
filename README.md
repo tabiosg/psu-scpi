@@ -49,3 +49,7 @@ What happens if voltage and power exceed power? Should we prevent this from happ
 When adding noise, do you change voltage? current? both?
 
 for code, make it alphabetical
+
+to create .exe do the following
+
+python3 -m PyInstaller --onefile --windowed graphic_display.py 
