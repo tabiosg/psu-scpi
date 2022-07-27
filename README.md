@@ -1,4 +1,4 @@
-# Controlling Power Supply via Python/Matlab
+# Controlling Power Supply via Python
 
 power_supply.py is currently a WIP and draft for controlling the Elektro-Automatik Power Supply using Python.
 
@@ -53,3 +53,7 @@ for code, make it alphabetical
 to create .exe do the following
 
 python3 -m PyInstaller --onefile --windowed graphic_display.py 
+
+TODO - alphabetical
+format code since it is a mess
+allow custom max values (instead of 3kw, 80, and 120)
