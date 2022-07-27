@@ -394,7 +394,7 @@ class Application:
         self.actual_current_label = self.create_label(self.actual_frame, "Current: 0 A", 1)
         self.actual_power_label = self.create_label(self.actual_frame, "Power: 0 W", 2)
         self.actual_mode_label = self.create_label(self.actual_frame, "Mode: Unknown", 3)
-        self.constant_power_label = self.create_label(self.constant_power_frame, "Currently using constant power", 0)
+        self.constant_power_label = self.create_label(self.constant_power_frame, "Currently using variable power", 0)
         self.voltage_current_constant_label = self.create_label(self.voltage_current_constant_frame, "Currently using constant voltage", 0)
 
     def create_slider(self, frame: ttk.Frame, max: float, cmd: Callable) -> tk.Scale:
