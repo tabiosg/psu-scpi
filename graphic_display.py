@@ -313,12 +313,10 @@ class Application:
         if self.constant_power_button.config("text")[-1] == "Change to constant power":
             self.constant_power = True
             self.constant_power_label.configure(text="Currently using constant power")
-            self.power_slider.pack()
             self.constant_power_button.config(text="Change to variable power")
         else:
             self.constant_power = False
             self.constant_power_label.config(text="Currently using variable power")
-            self.power_slider.pack_forget()
             self.constant_power_button.config(text="Change to constant power")
 
     def toggle_protocol_switch(self) -> None:
@@ -415,7 +413,6 @@ class Application:
         self.volt_slider = self.create_slider(self.volt_frame, 80, self.volt_slider_changed)
         self.curr_slider = self.create_slider(self.curr_frame, 120, self.curr_slider_changed)
         self.power_slider = self.create_slider(self.power_frame, 3000, self.power_slider_changed)
-        self.power_slider.pack_forget()
         self.add_volt_noise_slider = self.create_slider(self.add_volt_noise_frame, 1, self.add_volt_noise_slider_changed)
         self.mult_volt_noise_slider = self.create_slider(self.mult_volt_noise_frame, 0.4, self.mult_volt_noise_slider_changed)
         self.add_curr_noise_slider = self.create_slider(self.add_curr_noise_frame, 1, self.add_curr_noise_slider_changed)
