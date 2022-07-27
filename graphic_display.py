@@ -441,7 +441,7 @@ class Application:
             self.change_volt(self.requested_voltage)
         if self.constant_power:
             self.requested_current = (
-                self.requested_power / self.requested_voltage if self.requested_voltage != 0
+                min(self.requested_power / self.requested_voltage, 120) if self.requested_voltage != 0
                 else 0
             )
             self.change_curr(self.requested_current)
@@ -471,7 +471,7 @@ class Application:
             self.change_curr(self.requested_current)
         if self.constant_power:
             self.requested_voltage = (
-                self.requested_power / self.requested_current if self.requested_current != 0
+                min(self.requested_power / self.requested_current, 80) if self.requested_current != 0
                 else 0
             )
             self.change_volt(self.requested_voltage)
@@ -484,13 +484,13 @@ class Application:
             return
         if self.constant_voltage:
             self.requested_current = (
-                self.requested_power / self.requested_voltage if self.requested_voltage != 0
+                min(self.requested_power / self.requested_voltage, 120) if self.requested_voltage != 0
                 else 0
             )
-            self.change_volt(self.requested_current)
+            self.change_curr(self.requested_current)
         if not self.constant_voltage:
             self.requested_voltage = (
-                self.requested_power / self.requested_current if self.requested_current != 0
+                min(self.requested_power / self.requested_current, 80) if self.requested_current != 0
                 else 0
             )
             self.change_volt(self.requested_voltage)
