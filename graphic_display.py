@@ -421,7 +421,11 @@ class Application:
     def change_volt(self, volt: float) -> None:
         if (volt < 0 or volt > 80):
             return
-        volt = max(volt, 3000.0 / self.requested_current)
+        volt = min(
+            volt,
+            3000.0 / self.requested_current if self.requested_current != 0 
+            else volt
+        )
         self.volt_label.configure(text=f"Voltage: {round(volt, 3)} V")
         self.power_supply.make_command(Commands.SET_VOLTS, volt)
         self.requested_voltage = volt
@@ -436,7 +440,10 @@ class Application:
             # we should not bump up both values until one of the values is low.
             self.change_volt(self.requested_voltage)
         if self.constant_power:
-            self.requested_current = self.requested_power / self.requested_voltage
+            self.requested_current = (
+                self.requested_power / self.requested_voltage if self.requested_voltage != 0
+                else 0
+            )
             self.change_curr(self.requested_current)
         if previous_voltage < self.requested_voltage:
             self.change_volt(self.requested_voltage)
@@ -444,7 +451,11 @@ class Application:
     def change_curr(self, curr: float) -> None:
         if (curr < 0 or curr > 120):
             return
-        curr = max(curr, 3000.0 / self.requested_voltage)
+        curr = min(
+            curr,
+            3000.0 / self.requested_voltage if self.requested_voltage != 0 
+            else curr
+        )
         self.curr_label.configure(text=f"Current: {round(curr, 3)} A")
         self.power_supply.make_command(Commands.SET_CURR, curr)
         self.requested_current = curr
@@ -459,7 +470,10 @@ class Application:
             # we should not bump up both values until one of the values is low.
             self.change_curr(self.requested_current)
         if self.constant_power:
-            self.requested_voltage = self.requested_power / self.requested_current
+            self.requested_voltage = (
+                self.requested_power / self.requested_current if self.requested_current != 0
+                else 0
+            )
             self.change_volt(self.requested_voltage)
         if previous_current < self.requested_current:
             self.change_curr(self.requested_current)
@@ -469,10 +483,16 @@ class Application:
         if not self.constant_power:
             return
         if self.constant_voltage:
-            self.requested_current = self.requested_power / self.requested_voltage
+            self.requested_current = (
+                self.requested_power / self.requested_voltage if self.requested_voltage != 0
+                else 0
+            )
             self.change_volt(self.requested_current)
         if not self.constant_voltage:
-            self.requested_voltage = self.requested_power / self.requested_current
+            self.requested_voltage = (
+                self.requested_power / self.requested_current if self.requested_current != 0
+                else 0
+            )
             self.change_volt(self.requested_voltage)
 
     def change_add_volt_noise(self, add_noise: float) -> None:
