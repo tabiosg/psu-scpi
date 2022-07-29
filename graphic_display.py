@@ -16,6 +16,7 @@ class Application:
     _add_curr_noise_frame: ttk.Frame
     _add_volt_noise_frame: ttk.Frame
     _curr_frame: ttk.Frame
+    _max_frame:ttk.Frame
     _mult_curr_noise_frame: ttk.Frame
     _mult_volt_noise_frame: ttk.Frame
     _noise_select_frame: ttk.Frame
@@ -29,9 +30,12 @@ class Application:
     _curr_slider: tk.Scale
     _power_slider: tk.Scale
     _add_volt_noise_slider: tk.Scale
-    _mult_volt_noise_slider: tk.Scale
     _add_curr_noise_slider: tk.Scale
+    _max_curr_slider: tk.Scale
+    _max_power_slider: tk.Scale
+    _max_volt_slider: tk.Scale
     _mult_curr_noise_slider: tk.Scale
+    _mult_volt_noise_slider: tk.Scale
 
     _volt_label: ttk.Label
     _curr_label: ttk.Label
@@ -84,6 +88,7 @@ class Application:
         self._add_volt_noise_frame = None
         self._constant_power_frame = None
         self._curr_frame = None
+        self.max_frame = None
         self._mult_curr_noise_frame = None
         self._mult_volt_noise_frame = None
         self._on_frame = None
@@ -96,6 +101,9 @@ class Application:
         self._add_curr_noise_slider = None
         self._add_volt_noise_slider = None
         self._curr_slider = None
+        self._max_curr_slider = None
+        self._max_power_slider = None
+        self._max_volt_slider = None
         self._mult_volt_noise_slider = None
         self._mult_curr_noise_slider = None
         self._power_slider = None
@@ -262,7 +270,7 @@ class Application:
             * (1 + (random() - 0.5)*mult_curr_factor)
         )
 
-    def _create_slider(self, frame: ttk.Frame, max: float, cmd: Callable) -> tk.Scale:
+    def _create_slider(self, frame: ttk.Frame, row: int, max: float, cmd: Callable) -> tk.Scale:
         slider = tk.Scale(
             frame,
             from_=0,
@@ -271,7 +279,7 @@ class Application:
             resolution=0.001,
             command=cmd
         )
-        slider.grid(row = 1, column = 0, padx = 10, pady = 10)
+        slider.grid(row=row, column=0, padx=10, pady=10)
         return slider
 
     def _create_switch(self, frame: ttk.Frame, text: str, cmd: Callable) -> ttk.Button:
@@ -280,7 +288,7 @@ class Application:
             text=text,
             width=10,
             command=cmd)
-        button.grid(row = 1, column = 0, padx = 10, pady = 10, sticky = "NSEW")
+        button.grid(row=1, column=0, padx=10, pady=10, sticky="NSEW")
         return button
 
     def _curr_slider_changed(self, event) -> None:
@@ -339,8 +347,9 @@ class Application:
         self._add_volt_noise_frame = self._create_frame("Additive Voltage Noise", 1, 0)
         self._add_curr_noise_frame = self._create_frame("Additive Current Noise", 1, 1)
         self._power_frame = self._create_frame("Requested Power", 1, 2)
-        self._mult_volt_noise_frame = self._create_frame("Multiplicative Voltage Noise", 2, 0)
+        self._max_frame = self._create_frame("Change Max Values", 1, 3)
         self._mult_curr_noise_frame = self._create_frame("Multiplicative Current Noise", 2, 1)
+        self._mult_volt_noise_frame = self._create_frame("Multiplicative Voltage Noise", 2, 0)
         self._constant_power_frame = self._create_frame("Select Constant/Variable Power", 2, 2)
         self._on_frame = self._create_frame("Select On/Off", 3, 0)
         self._protocol_frame = self._create_frame("Select Protocol", 3, 1)
@@ -355,8 +364,8 @@ class Application:
         self._add_volt_noise_label = self._create_label(self._add_volt_noise_frame, "Add Volt Noise: 0.0", 0)
         self._constant_power_label = self._create_label(self._constant_power_frame, "Currently using variable power", 0)
         self._curr_label = self._create_label(self._curr_frame, "Curent: 0.0 A", 0)
-        self._mult_volt_noise_label = self._create_label(self._mult_volt_noise_frame, "Mult Volt Noise: 0.0", 0)
         self._mult_curr_noise_label = self._create_label(self._mult_curr_noise_frame, "Mult Curr Noise: 0.0", 0)
+        self._mult_volt_noise_label = self._create_label(self._mult_volt_noise_frame, "Mult Volt Noise: 0.0", 0)
         self._on_label = self._create_label(self._on_frame, "Currently off", 0)
         self._power_label = self._create_label(self._power_frame, "Power: 0.0 W", 0)
         self._protocol_label = self._create_label(self._protocol_frame, "Currently using USB", 0)
@@ -368,7 +377,7 @@ class Application:
         self._noise_status = tk.StringVar()
         self._noise_status.set(choices[0])
         self._noise_menu = tk.OptionMenu(self._noise_select_frame, self._noise_status, *choices)
-        self._noise_menu.grid(row = 0, column = 0, padx = 10, pady = 10)
+        self._noise_menu.grid(row=0, column=0, padx=10, pady=10)
 
     def _load_popup_menu(self) -> None:
         self._popup_menu = tk.Menu(self._app_window, tearoff=False)
@@ -421,19 +430,34 @@ class Application:
         self._app_window.bind("<Button-3>", self._show_popup_menu)
 
     def _load_sliders(self) -> None:
-        self._add_curr_noise_slider = self._create_slider(self._add_curr_noise_frame, 1, self._add_curr_noise_slider_changed)
-        self._add_volt_noise_slider = self._create_slider(self._add_volt_noise_frame, 1, self._add_volt_noise_slider_changed)
-        self._curr_slider = self._create_slider(self._curr_frame, self._max_current, self._curr_slider_changed)
-        self._mult_curr_noise_slider = self._create_slider(self._mult_curr_noise_frame, 0.4, self._mult_curr_noise_slider_changed)
-        self._mult_volt_noise_slider = self._create_slider(self._mult_volt_noise_frame, 0.4, self._mult_volt_noise_slider_changed)
-        self._power_slider = self._create_slider(self._power_frame, self._max_power, self._power_slider_changed)
-        self._volt_slider = self._create_slider(self._volt_frame, self._max_voltage, self._volt_slider_changed)
+        self._add_curr_noise_slider = self._create_slider(self._add_curr_noise_frame, 1, 1, self._add_curr_noise_slider_changed)
+        self._add_volt_noise_slider = self._create_slider(self._add_volt_noise_frame, 1, 1, self._add_volt_noise_slider_changed)
+        self._curr_slider = self._create_slider(self._curr_frame, 1, self._max_current, self._curr_slider_changed)
+        self._max_curr_slider = self._create_slider(self._max_frame, 1, 120, self._max_curr_slider_changed)
+        self._max_power_slider = self._create_slider(self._max_frame, 3, 3000, self._max_power_slider_changed)
+        self._max_volt_slider = self._create_slider(self._max_frame, 2, 80, self._max_volt_slider_changed)
+        self._mult_curr_noise_slider = self._create_slider(self._mult_curr_noise_frame, 1, 0.4, self._mult_curr_noise_slider_changed)
+        self._mult_volt_noise_slider = self._create_slider(self._mult_volt_noise_frame, 1, 0.4, self._mult_volt_noise_slider_changed)
+        self._power_slider = self._create_slider(self._power_frame, 1, self._max_power, self._power_slider_changed)
+        self._volt_slider = self._create_slider(self._volt_frame, 1, self._max_voltage, self._volt_slider_changed)
 
     def _load_switches(self) -> None:
         self._constant_power_button = self._create_switch(self._constant_power_frame, "Change to constant power", self._toggle_constant_power_switch)
         self._on_button = self._create_switch(self._on_frame, "Turn on", self._toggle_on_switch)
         self._protocol_button = self._create_switch(self._protocol_frame, "Change to Ethernet", self._toggle_protocol_switch)
         self._volt_curr_constant_button = self._create_switch(self._volt_curr_constant_frame, "Change to constant current", self._toggle_volt_curr_constant_switch)
+
+    def _max_curr_slider_changed(self, event) -> None:
+        self._max_current = self._max_curr_slider.get()
+        self._curr_slider = self._create_slider(self._curr_frame, 1, self._max_current, self._curr_slider_changed)
+
+    def _max_power_slider_changed(self, event) -> None:
+        self._max_power = self._max_power_slider.get()
+        self._power_slider = self._create_slider(self._power_frame, 1, self._max_power, self._power_slider_changed)
+
+    def _max_volt_slider_changed(self, event) -> None:
+        self._max_voltage = self._max_volt_slider.get()
+        self._volt_slider = self._create_slider(self._volt_frame, 1, self._max_voltage, self._volt_slider_changed)
 
     def _mult_curr_noise_slider_changed(self, event) -> None:
         self._change_mult_curr_noise(self._mult_curr_noise_slider.get())        
