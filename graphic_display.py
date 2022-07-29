@@ -82,7 +82,7 @@ class Application:
 
         self._add_curr_noise_frame = None
         self._add_volt_noise_frame = None
-        self.constant_power_frame = None
+        self._constant_power_frame = None
         self._curr_frame = None
         self._mult_curr_noise_frame = None
         self._mult_volt_noise_frame = None
@@ -176,29 +176,21 @@ class Application:
         window_name.geometry("+{}+{}".format(horiz_center, vert_center))
 
     def _change_add_curr_noise(self, add_noise: float) -> None:
-        if(add_noise < 0 or add_noise > 1):
-            return
         self._add_curr_noise_label.configure(
             text=f"Add Curr Noise: {round(add_noise, 3)}"
         )
 
     def _change_add_volt_noise(self, add_noise: float) -> None:
-        if(add_noise < 0 or add_noise > 1):
-            return
         self._add_volt_noise_label.configure(
             text=f"Add Volt Noise: {round(add_noise, 3)}"
         )
 
     def _change_mult_curr_noise(self, mult_noise: float) -> None:
-        if(mult_noise < 0 or mult_noise > 0.4):
-            return
         self._mult_curr_noise_label.configure(
             text=f"Mult Curr Noise: {round(mult_noise, 3)}"
         )
 
     def _change_mult_volt_noise(self, mult_noise: float) -> None:
-        if(mult_noise < 0 or mult_noise > 0.4):
-            return
         self._mult_volt_noise_label.configure(
             text=f"{round(mult_noise, 3)}"
         )
@@ -321,13 +313,17 @@ class Application:
         self._change_slider_resolution(self._curr_slider, 0.001)
 
     def _load_all_graphics(self) -> None:
+        # Load app window first.
+        # Then load frames. Theen load labels since sliders and switches modify it.
         self._load_app_window()
         self._load_frames()
-        self._load_sliders()
         self._load_labels()
+
+        self._load_sliders()
         self._load_switches()
-        self._load_popup_menu()
+
         self._load_noise_menu()
+        self._load_popup_menu()
 
     def _load_app_window(self) -> None:
         self._app_window = tk.Tk()
@@ -345,27 +341,27 @@ class Application:
         self._power_frame = self._create_frame("Requested Power", 1, 2)
         self._mult_volt_noise_frame = self._create_frame("Multiplicative Voltage Noise", 2, 0)
         self._mult_curr_noise_frame = self._create_frame("Multiplicative Current Noise", 2, 1)
-        self.constant_power_frame = self._create_frame("Select Constant/Variable Power", 2, 2)
+        self._constant_power_frame = self._create_frame("Select Constant/Variable Power", 2, 2)
         self._on_frame = self._create_frame("Select On/Off", 3, 0)
         self._protocol_frame = self._create_frame("Select Protocol", 3, 1)
         self._volt_curr_constant_frame = self._create_frame("Keep Voltage/Current Constant", 3, 2)
 
     def _load_labels(self) -> None:
-        self._volt_label = self._create_label(self._volt_frame, "Voltage: 0.0 V", 0)
-        self._curr_label = self._create_label(self._curr_frame, "Curent: 0.0 A", 0)
-        self._add_volt_noise_label = self._create_label(self._add_volt_noise_frame, "Add Volt Noise: 0.0", 0)
-        self._mult_volt_noise_label = self._create_label(self._mult_volt_noise_frame, "Mult Volt Noise: 0.0", 0)
-        self._add_curr_noise_label = self._create_label(self._add_curr_noise_frame, "Add Curr Noise: 0.0", 0)
-        self._mult_curr_noise_label = self._create_label(self._mult_curr_noise_frame, "Mult Curr Noise: 0.0", 0)
-        self._power_label = self._create_label(self._power_frame, "Power: 0.0 W", 0)
-        self._on_label = self._create_label(self._on_frame, "Currently off", 0)
-        self._protocol_label = self._create_label(self._protocol_frame, "Currently using USB", 0)
-        self._actual_voltage_label = self._create_label(self._actual_frame, "Voltage: 0.0 V", 0)
         self._actual_current_label = self._create_label(self._actual_frame, "Current: 0.0 A", 1)
+        self._actual_mode_label = self._create_label(self._actual_frame, "Mode: Unknown", 3)
         self._actual_power_label = self._create_label(self._actual_frame, "Power: 0.0 W", 2)
-        self.actual_mode_label = self._create_label(self._actual_frame, "Mode: Unknown", 3)
-        self._constant_power_label = self._create_label(self.constant_power_frame, "Currently using variable power", 0)
+        self._actual_voltage_label = self._create_label(self._actual_frame, "Voltage: 0.0 V", 0)
+        self._add_curr_noise_label = self._create_label(self._add_curr_noise_frame, "Add Curr Noise: 0.0", 0)
+        self._add_volt_noise_label = self._create_label(self._add_volt_noise_frame, "Add Volt Noise: 0.0", 0)
+        self._constant_power_label = self._create_label(self._constant_power_frame, "Currently using variable power", 0)
+        self._curr_label = self._create_label(self._curr_frame, "Curent: 0.0 A", 0)
+        self._mult_volt_noise_label = self._create_label(self._mult_volt_noise_frame, "Mult Volt Noise: 0.0", 0)
+        self._mult_curr_noise_label = self._create_label(self._mult_curr_noise_frame, "Mult Curr Noise: 0.0", 0)
+        self._on_label = self._create_label(self._on_frame, "Currently off", 0)
+        self._power_label = self._create_label(self._power_frame, "Power: 0.0 W", 0)
+        self._protocol_label = self._create_label(self._protocol_frame, "Currently using USB", 0)
         self._volt_curr_constant_label = self._create_label(self._volt_curr_constant_frame, "Currently using constant voltage", 0)
+        self._volt_label = self._create_label(self._volt_frame, "Voltage: 0.0 V", 0)
 
     def _load_noise_menu(self) -> None:
         choices = ["None", "Additive", "Multiplicative"]
@@ -425,18 +421,18 @@ class Application:
         self._app_window.bind("<Button-3>", self._show_popup_menu)
 
     def _load_sliders(self) -> None:
-        self._volt_slider = self._create_slider(self._volt_frame, self._max_voltage, self._volt_slider_changed)
-        self._curr_slider = self._create_slider(self._curr_frame, self._max_current, self._curr_slider_changed)
-        self._power_slider = self._create_slider(self._power_frame, self._max_power, self._power_slider_changed)
-        self._add_volt_noise_slider = self._create_slider(self._add_volt_noise_frame, 1, self._add_volt_noise_slider_changed)
-        self._mult_volt_noise_slider = self._create_slider(self._mult_volt_noise_frame, 0.4, self._mult_volt_noise_slider_changed)
         self._add_curr_noise_slider = self._create_slider(self._add_curr_noise_frame, 1, self._add_curr_noise_slider_changed)
+        self._add_volt_noise_slider = self._create_slider(self._add_volt_noise_frame, 1, self._add_volt_noise_slider_changed)
+        self._curr_slider = self._create_slider(self._curr_frame, self._max_current, self._curr_slider_changed)
         self._mult_curr_noise_slider = self._create_slider(self._mult_curr_noise_frame, 0.4, self._mult_curr_noise_slider_changed)
+        self._mult_volt_noise_slider = self._create_slider(self._mult_volt_noise_frame, 0.4, self._mult_volt_noise_slider_changed)
+        self._power_slider = self._create_slider(self._power_frame, self._max_power, self._power_slider_changed)
+        self._volt_slider = self._create_slider(self._volt_frame, self._max_voltage, self._volt_slider_changed)
 
     def _load_switches(self) -> None:
+        self._constant_power_button = self._create_switch(self._constant_power_frame, "Change to constant power", self._toggle_constant_power_switch)
         self._on_button = self._create_switch(self._on_frame, "Turn on", self._toggle_on_switch)
         self._protocol_button = self._create_switch(self._protocol_frame, "Change to Ethernet", self._toggle_protocol_switch)
-        self._constant_power_button = self._create_switch(self.constant_power_frame, "Change to constant power", self._toggle_constant_power_switch)
         self._volt_curr_constant_button = self._create_switch(self._volt_curr_constant_frame, "Change to constant current", self._toggle_volt_curr_constant_switch)
 
     def _mult_curr_noise_slider_changed(self, event) -> None:
@@ -537,7 +533,7 @@ class Application:
             self._actual_power = 0
         self._actual_power_label.configure(text=f"Power: {round(self._actual_power, 3)} W")
         self._actual_mode = self._power_supply.make_command(Commands.GET_OUT_MODE)
-        self.actual_mode_label.configure(text=f"Mode: {self._actual_mode}")
+        self._actual_mode_label.configure(text=f"Mode: {self._actual_mode}")
         self._app_window.after(100, self._update_actual)
 
     def _update_noise(self) -> None:
