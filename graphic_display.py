@@ -12,19 +12,20 @@ class Application:
 
     _app_window: tk.Tk
     
-    _actual_frame: ttk.Frame
-    _add_curr_noise_frame: ttk.Frame
-    _add_volt_noise_frame: ttk.Frame
-    _curr_frame: ttk.Frame
-    _max_frame:ttk.Frame
-    _mult_curr_noise_frame: ttk.Frame
-    _mult_volt_noise_frame: ttk.Frame
-    _noise_select_frame: ttk.Frame
-    _power_frame: ttk.Frame
-    _on_frame: ttk.Frame
-    _protocol_frame: ttk.Frame
-    _volt_frame: ttk.Frame
-    _volt_curr_constant_frame: ttk.Frame
+    _actual_frame: ttk.LabelFrame
+    _add_curr_noise_frame: ttk.LabelFrame
+    _add_volt_noise_frame: ttk.LabelFrame
+    _curr_frame: ttk.LabelFrame
+    _excel_frame: ttk.LabelFrame
+    _max_frame: ttk.LabelFrame
+    _mult_curr_noise_frame: ttk.LabelFrame
+    _mult_volt_noise_frame: ttk.LabelFrame
+    _noise_select_frame: ttk.LabelFrame
+    _power_frame: ttk.LabelFrame
+    _on_frame: ttk.LabelFrame
+    _protocol_frame: ttk.LabelFrame
+    _volt_frame: ttk.LabelFrame
+    _volt_curr_constant_frame: ttk.LabelFrame
 
     _volt_slider: tk.Scale
     _curr_slider: tk.Scale
@@ -52,10 +53,11 @@ class Application:
     _constant_power_label: ttk.Label
     _volt_curr_constant_label: ttk.Label
 
-    _on_button: ttk.Button
-    _constant_power_button: ttk.Button
-    _protocol_button: ttk.Button
-    _volt_curr_constant_button: ttk.Button
+    _constant_power_button: tk.Button
+    _excel_button: tk.Button
+    _on_button: tk.Button
+    _protocol_button: tk.Button
+    _volt_curr_constant_button: tk.Button
 
     _popup_menu: tk.Menu
     _noise_menu: tk.OptionMenu
@@ -82,55 +84,6 @@ class Application:
     _power_supply: PowerSupply
 
     def __init__(self) -> None:
-        self._app_window = None
-
-        self._add_curr_noise_frame = None
-        self._add_volt_noise_frame = None
-        self._constant_power_frame = None
-        self._curr_frame = None
-        self.max_frame = None
-        self._mult_curr_noise_frame = None
-        self._mult_volt_noise_frame = None
-        self._on_frame = None
-        self._power_frame = None
-        self._protocol_frame = None
-        self._noise_select_frame = None
-        self._volt_frame = None
-        self._volt_curr_constant_frame = None
-
-        self._add_curr_noise_slider = None
-        self._add_volt_noise_slider = None
-        self._curr_slider = None
-        self._max_curr_slider = None
-        self._max_power_slider = None
-        self._max_volt_slider = None
-        self._mult_volt_noise_slider = None
-        self._mult_curr_noise_slider = None
-        self._power_slider = None
-        self._volt_slider = None
-
-        self._actual_current_label = None
-        self._actual_power_label = None
-        self._actual_voltage_label = None
-        self._add_curr_noise_label = None
-        self._add_volt_noise_label = None
-        self._constant_power_label = None
-        self._curr_label = None
-        self._mult_volt_noise_label = None
-        self._mult_curr_noise_label = None
-        self._on_label = None
-        self._power_label = None
-        self._protocol_label = None
-        self._volt_curr_constant_label = None
-        self._volt_label = None
-
-        self._constant_power_button = None
-        self._on_button = None
-        self._protocol_button = None
-        self._volt_curr_constant_button = None
-
-        self._popup_menu = None
-        self._noise_menu = None
 
         self._max_current = 120.0
         self._max_voltage = 80.0
@@ -142,8 +95,6 @@ class Application:
         self._constant_power = False
         self._constant_voltage = True
         self._requested_mode_is_on = False
-
-        self._noise_status = None
 
         self._actual_voltage = 0.0
         self._actual_current = 0.0
@@ -212,7 +163,7 @@ class Application:
             else curr
         )
         self._curr_label.configure(text=f"Current: {round(curr, 3)} A")
-        self._power_supply.make_command(Commands.SET_CURR, curr)
+        self._power_supply.make_command(Commands.SET_CURR, str(curr))
         self._requested_current = curr
         self._update_power()
 
@@ -228,9 +179,13 @@ class Application:
             else volt
         )
         self._volt_label.configure(text=f"Voltage: {round(volt, 3)} V")
-        self._power_supply.make_command(Commands.SET_VOLTS, volt)
+        self._power_supply.make_command(Commands.SET_VOLTS, str(volt))
         self._requested_voltage = volt
         self._update_power()
+
+    def _click_excel_button(self) -> None:
+        # TODO - eventually
+        pass
 
     def _create_additive_noise(self) -> None:
         add_volt_factor = self._add_volt_noise_slider.get()
@@ -239,7 +194,7 @@ class Application:
         add_curr_factor = self._add_curr_noise_slider.get()
         self._change_curr(self._requested_current + (random() - 0.5)*add_curr_factor)
 
-    def _create_frame(self, text: str, row: int, col: int) -> ttk.Frame:
+    def _create_frame(self, text: str, row: int, col: int) -> ttk.LabelFrame:
         frame = ttk.LabelFrame(
             self._app_window,
             width = 150,
@@ -248,7 +203,7 @@ class Application:
         frame.grid(row=row, column=col, padx=10, pady=10)
         return frame
 
-    def _create_label(self, frame: tk.Frame, text: str, row: int) -> ttk.Label:
+    def _create_label(self, frame: ttk.LabelFrame, text: str, row: int) -> ttk.Label:
         label = ttk.Label(
             frame,
             text=text
@@ -270,7 +225,7 @@ class Application:
             * (1 + (random() - 0.5)*mult_curr_factor)
         )
 
-    def _create_slider(self, frame: ttk.Frame, row: int, max: float, cmd: Callable) -> tk.Scale:
+    def _create_slider(self, frame: ttk.LabelFrame, row: int, max: float, cmd: Callable) -> tk.Scale:
         slider = tk.Scale(
             frame,
             from_=0,
@@ -282,7 +237,7 @@ class Application:
         slider.grid(row=row, column=0, padx=10, pady=10)
         return slider
 
-    def _create_switch(self, frame: ttk.Frame, text: str, cmd: Callable) -> ttk.Button:
+    def _create_switch(self, frame: ttk.LabelFrame, text: str, cmd: Callable) -> tk.Button:
         button = Button(
             frame,
             text=text,
@@ -351,6 +306,7 @@ class Application:
         self._mult_curr_noise_frame = self._create_frame("Multiplicative Current Noise", 2, 1)
         self._mult_volt_noise_frame = self._create_frame("Multiplicative Voltage Noise", 2, 0)
         self._constant_power_frame = self._create_frame("Select Constant/Variable Power", 2, 2)
+        self._excel_frame = self._create_frame("Load Excel Data", 2, 3)
         self._on_frame = self._create_frame("Select On/Off", 3, 0)
         self._protocol_frame = self._create_frame("Select Protocol", 3, 1)
         self._volt_curr_constant_frame = self._create_frame("Keep Voltage/Current Constant", 3, 2)
@@ -443,6 +399,7 @@ class Application:
 
     def _load_switches(self) -> None:
         self._constant_power_button = self._create_switch(self._constant_power_frame, "Change to constant power", self._toggle_constant_power_switch)
+        self._excel_button = self._create_switch(self._excel_frame, "Load excel data", self._click_excel_button)
         self._on_button = self._create_switch(self._on_frame, "Turn on", self._toggle_on_switch)
         self._protocol_button = self._create_switch(self._protocol_frame, "Change to Ethernet", self._toggle_protocol_switch)
         self._volt_curr_constant_button = self._create_switch(self._volt_curr_constant_frame, "Change to constant current", self._toggle_volt_curr_constant_switch)
@@ -509,12 +466,12 @@ class Application:
             self._requested_mode_is_on = True
             self._on_label.configure(text=f"Currently on")
             self._on_button.config(text="Turn off")
-            self._power_supply.make_command(Commands.SET_CHANNEL_STATE, 0)
+            self._power_supply.make_command(Commands.SET_CHANNEL_STATE, str(0))
         else:
             self._requested_mode_is_on = False
             self._on_label.configure(text=f"Currently off")
             self._on_button.config(text="Turn on")
-            self._power_supply.make_command(Commands.SET_CHANNEL_STATE, 1)
+            self._power_supply.make_command(Commands.SET_CHANNEL_STATE, str(1))
 
     def _toggle_protocol_switch(self) -> None:
         # TODO - need to change this eventually to be EthernetProtocol and UsbProtocol
@@ -539,13 +496,13 @@ class Application:
 
     def _update_actual(self) -> None:
         try:
-            self._actual_voltage = float(self._power_supply.make_command(Commands.GET_VOLTS)), 3
+            self._actual_voltage = float(self._power_supply.make_command(Commands.GET_VOLTS))
         except ValueError:
             # falls here since make_command for debugging is not real
             self._actual_voltage = round(random() * -1, 3)  # done for debugging purposes
         self._actual_voltage_label.configure(text=f"Voltage: {round(self._actual_voltage, 3)} V")
         try:
-            self._actual_current = float(self._power_supply.make_command(Commands.GET_CURR)), 3
+            self._actual_current = float(self._power_supply.make_command(Commands.GET_CURR))
         except ValueError:
             # falls here since make_command for debugging is not real
             self._actual_current = round(random() * -1, 3)  # done for debugging purposes
