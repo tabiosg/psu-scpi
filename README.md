@@ -22,28 +22,26 @@ Check external documentation such as the Elektro Automatik reference manual, dat
 
 No tests have been done yet
 
-Assigned July 21, 2022
-
 ## Program
 
 graphic_display.py is to act as a virtual power supply.
+Can run 
+`python3 set_voltage.py [insert_voltage_in_volts]`
+or
+`python3 set_voltage.py [insert_current_in_amps]`,
+which assumes USB connection.
 
-## todo
+To open the graphic_display, run
+`python3 graphic_display.py`
+or double click the executable.
 
-set example of how to change voltage
+To generate a new executable after creating new code, 
+run
+`python3 -m PyInstaller --onefile --windowed graphic_display.py`
+and then locate graphic_display.exe in the dist folder.
 
-set_Voltage.py 50V
-increments -> min and max
+# TODO 
 
-Read a spreadsheet from excel
-
-add a button to put fluctuation to current
-white noise: current + noise
-or multiplicative noise: current * noise
-wxPython for graphics
-
-lex and yacc are interesting
-
-to create .exe do the following
-
-python3 -m PyInstaller --onefile --windowed graphic_display.py 
+- [ ] Ethernet and USB protocols have not been tested
+- [ ] Excel sheet button has not been fully developed
+- [ ] Actual values section is currently faked
