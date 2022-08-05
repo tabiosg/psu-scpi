@@ -71,18 +71,32 @@ class UsbProtocol(Protocol):
 
     # TODO - Verify that ports and baudrate are accurate
     def __init__(self, port: str = "COM8", baudrate: int = 115200) -> None:
-        self.conn = serial.Serial(port=port, baudrate=baudrate)
+        try:
+            self.conn = serial.Serial(port=port, baudrate=baudrate)
+        except:
+            pass
 
     def write(self, msg: str = "") -> None:
         # TODO - Test that USB write works
-        self.conn.write(msg)
+        try:
+            self.conn.write(msg)
+        except:
+            pass
 
     def read(self) -> str:
         # TODO - Test that USB read works
-        return self.conn.readline()
+        response = ""
+        try:
+            response = self.conn.readline()
+        except:
+            pass
+        return response
 
     def __del__(self):
-        self.conn.close()
+        try:
+            self.conn.close()
+        except:
+            pass
 
 
 class EthernetProtocol(Protocol):
@@ -90,19 +104,34 @@ class EthernetProtocol(Protocol):
     # TODO - Verify that IP is accurate (192.168.0.2 is usually the default ip)
     # According to the reference manual, the standard port is 5025
     def __init__(self, ip: str = "192.168.0.2", port: int = 5025) -> None:
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect(ip, port)
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # TODO - COMMENTED OUT TEMPORARILY BECAUSE PROGRAM GETS STUCK ON THIS
+            # self.s.connect((ip, port))
+        except:
+            pass
 
     def write(self, msg: str = "") -> None:
         # TODO - Test that Ethernet write works
-        self.s.sendall(msg)
+        try:
+            self.s.sendall(msg)
+        except:
+            pass
 
     def read(self) -> str:
         # TODO - Test that Ethernet read works
-        return self.s.recv()
+        response = ""
+        try:
+            response = self.s.recv()
+        except:
+            pass
+        return response
 
     def __del__(self):
-        self.s.close()
+        try:
+            self.s.close()
+        except:
+            pass
 
 class DebugProtocol(Protocol):
 

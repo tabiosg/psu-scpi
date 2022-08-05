@@ -102,7 +102,7 @@ class Application:
 
         self._actual_mode = "Unknown"
 
-        self._power_supply = PowerSupply(protocol=DebugProtocol())
+        self._power_supply = PowerSupply(protocol=UsbProtocol())
 
         self._load_all_graphics()
 
@@ -478,11 +478,11 @@ class Application:
         if self._protocol_button.config("text")[-1] == "Change to USB":
             self._protocol_label.configure(text="Currently using USB")
             self._protocol_button.config(text="Change to Ethernet")
-            self._power_supply = PowerSupply(protocol=DebugProtocol())
+            self._power_supply = PowerSupply(protocol=UsbProtocol())
         else:
             self._protocol_label.config(text="Currently using Ethernet")
             self._protocol_button.config(text="Change to USB")
-            self._power_supply = PowerSupply(protocol=DebugProtocol())
+            self._power_supply = PowerSupply(protocol=EthernetProtocol())
 
     def _toggle_volt_curr_constant_switch(self) -> None:
         if self._volt_curr_constant_button.config("text")[-1] == "Change to constant current":
